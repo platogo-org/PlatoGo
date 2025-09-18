@@ -37,4 +37,8 @@
   "devDependencies": {
     "jest": "^29.0.0"
   }
+  ,
+  "jest": {
+    "setupFiles": ["<rootDir>/tests/setup.js"]
+  }
 }
