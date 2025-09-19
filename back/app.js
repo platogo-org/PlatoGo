@@ -17,6 +17,7 @@ const categoryRouter = require("./routes/categoryRoutes");
 const orderRouter = require("./routes/orderRoutes");
 const productRouter = require("./routes/productRoutes");
 const restaurantRouter = require("./routes/restaurantRoutes");
+const viewRouter = require("./routes/viewRoutes");
 
 // Start express app
 const app = express();
@@ -123,6 +124,12 @@ app.use("/api/v1/category", categoryRouter);
 app.use("/api/v1/order", orderRouter);
 app.use("/api/v1/product", productRouter);
 app.use("/api/v1/restaurant", restaurantRouter);
+
+// View engine and static files
+app.set('view engine', 'pug');
+app.set('views', `${__dirname}/views`);
+app.use(express.static(`${__dirname}/public`));
+app.use('/', viewRouter);
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on the server!`, 404));

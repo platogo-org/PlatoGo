@@ -6,8 +6,8 @@ const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const Email = require("./../utils/email");
 
-const signToken = (id) =>
-  jwt.sign({ id }, process.env.JWT_SECRET, {
+const signToken = (id, role) =>
+  jwt.sign({ id, role }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 
@@ -23,17 +23,26 @@ const createSendToken = (user, statusCode, req, res) => {
   // PROD DEV
   if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
 
-  const token = signToken(user._id);
+  const token = signToken(user._id, user.role);
   res.cookie("jwt", token, cookieOptions);
   // Remove password from output
   user.password = undefined;
-  res.status(statusCode).json({
+  // If the request expects HTML (form login), include a redirectUrl for frontend
+  const accept = req.headers.accept || '';
+  const payload = {
     status: "success",
     token,
-    data: {
-      user,
-    },
-  });
+    data: { user },
+  };
+  if (accept.includes('text/html')) {
+    let redirectUrl;
+    if (user.role === 'super-admin') redirectUrl = '/super-admin/dashboard';
+    else if (user.role === 'restaurant-admin') redirectUrl = '/restaurant/dashboard';
+    else redirectUrl = null;
+    payload.redirectUrl = redirectUrl;
+  }
+
+  res.status(statusCode).json(payload);
 };
 
 exports.signup = catchAsync(async (req, res, next) => {
@@ -177,6 +186,19 @@ exports.restrictTo =
     next();
   };
 
+// Ensure the authenticated user is a Super Admin
+exports.ensureSuperAdmin = (req, res, next) => {
+  if (!req.user) {
+    return next(new AppError("You are not logged in! Please log in to get access", 401));
+  }
+
+  if (req.user.role !== "super-admin") {
+    return next(new AppError("Only Super Admins can perform this action", 403));
+  }
+
+  next();
+};
+
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on POSTed email
   const user = await User.findOne({ email: req.body.email });
@@ -265,3 +287,11 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   //   token,
   // });
 });
+
+// Helper for determining redirect URL by role (exported for tests)
+exports.getRedirectUrlForUser = (user) => {
+  if (!user || !user.role) return null;
+  if (user.role === 'super-admin') return '/super-admin/dashboard';
+  if (user.role === 'restaurant-admin') return '/restaurant/dashboard';
+  return null;
+};

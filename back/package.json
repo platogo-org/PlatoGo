@@ -4,7 +4,7 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --runInBand"
   },
   "author": "platogoteam",
   "license": "ISC",
@@ -32,5 +32,13 @@
     "sharp": "^0.34.3",
     "validator": "^13.15.15",
     "xss-clean": "^0.1.4"
+  }
+  ,
+  "devDependencies": {
+    "jest": "^29.0.0"
+  }
+  ,
+  "jest": {
+    "setupFiles": ["<rootDir>/tests/setup.js"]
   }
 }
