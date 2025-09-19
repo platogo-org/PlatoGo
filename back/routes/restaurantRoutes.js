@@ -14,7 +14,7 @@ restaurantRouter
 restaurantRouter
   .route("/:id")
   .get(restaurantController.getRestaurant)
-  .patch(restaurantController.updateRestaurant)
-  .delete(restaurantController.deleteRestaurant);
+  .patch(authController.ensureSuperAdmin, restaurantController.updateRestaurant)
+  .delete(authController.ensureSuperAdmin, restaurantController.deleteRestaurant);
 
 module.exports = restaurantRouter;

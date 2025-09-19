@@ -26,8 +26,8 @@ usersRouter.patch(
 usersRouter.delete("/deleteMe", userController.deleteMe);
 
 // Use ensureSuperAdmin middleware on global admin routes
+// Only super-admin can access the following user management routes
 usersRouter.use(authController.ensureSuperAdmin);
-usersRouter.use(authController.restrictTo("admin"));
 
 usersRouter
   .route("/")

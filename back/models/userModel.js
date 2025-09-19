@@ -5,6 +5,12 @@ const bcrypt = require("bcryptjs");
 
 // name, email, photo, password, passwordConfirm
 
+const ROLES = {
+  SUPER_ADMIN: 'super-admin',
+  RESTAURANT_ADMIN: 'restaurant-admin',
+  USER: 'user'
+};
+
 const userShcema = new mongoose.Schema({
   name: {
     type: String,
@@ -20,8 +26,8 @@ const userShcema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["super-admin", "restaurant-admin"],
-    default: "user",
+    enum: [ROLES.SUPER_ADMIN, ROLES.RESTAURANT_ADMIN, ROLES.USER],
+    default: ROLES.USER,
   },
   password: {
     type: String,
@@ -114,3 +120,4 @@ userShcema.methods.createPasswordResetToken = function () {
 
 const User = mongoose.model("User", userShcema);
 module.exports = User;
+module.exports.ROLES = ROLES;
