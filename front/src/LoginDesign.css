@@ -1,0 +1,514 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.login-container {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Red gradient background */
+.red-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #E8373E 0%, #D83339 100%);
+  z-index: 1;
+}
+
+/* White curved panel */
+.white-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60%;
+  height: 100%;
+  background: white;
+  z-index: 2;
+  clip-path: ellipse(80% 100% at 100% 50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Food images positioning */
+.food-images {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 70%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.food-img {
+  position: absolute;
+  object-fit: contain;
+  background: transparent;
+  filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.25));
+}
+
+/* Pizza image - top left, largest */
+.pizza-img {
+  width: 550px;
+  height: 550px;
+  top: 2%;
+  left: 5%;
+  z-index: 3;
+}
+
+/* Seafood image - center right, medium */
+.seafood-img {
+  width: 480px;
+  height: 480px;
+  top: 28%;
+  left: 22%;
+  z-index: 2;
+}
+
+/* Small dish - bottom left, smallest */
+.small-dish-img {
+  width: 400px;
+  height: 400px;
+  top: 55%;
+  left: 8%;
+  z-index: 1;
+}
+
+/* Login section */
+.login-section {
+  width: 350px;
+  max-width: 90%;
+  padding: 20px;
+}
+
+/* Brand header */
+.brand-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 40px;
+}
+
+.brand-title {
+  font-family: 'Roboto', sans-serif;
+  font-size: 40px;
+  font-weight: 400;
+  color: #020202;
+  letter-spacing: 0.15px;
+}
+
+.avatar-icon {
+  width: 36px;
+  height: 36px;
+}
+
+.avatar-icon img {
+  width: 100%;
+  height: 100%;
+}
+
+/* Form inputs */
+.form-inputs {
+  margin-bottom: 30px;
+}
+
+/* Form styles */
+.form-inputs {
+  width: 100%;
+  margin: 30px 0;
+}
+
+.error-message {
+  background: #fee;
+  color: #c33;
+  padding: 12px 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #fcc;
+  font-size: 14px;
+  text-align: center;
+}
+
+.input-group {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.login-input {
+  width: 100%;
+  height: 54px;
+  padding: 15px 20px;
+  background: #EEEEEE;
+  border: none;
+  border-radius: 20px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  color: #020202;
+  outline: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.login-input::placeholder {
+  color: #666666;
+  transition: color 0.3s ease;
+}
+
+.login-input:focus {
+  background: #E5E5E5;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1), 
+              0 0 0 3px rgba(232, 55, 62, 0.1);
+}
+
+.login-input:focus::placeholder {
+  color: #999999;
+}
+
+.login-input:hover:not(:focus) {
+  background: #E8E8E8;
+  transform: translateY(-1px);
+}
+
+.password-group {
+  position: relative;
+}
+
+.visibility-btn {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.visibility-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.visibility-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.visibility-btn:focus {
+  outline: 2px solid rgba(232, 55, 62, 0.3);
+  outline-offset: 2px;
+}
+
+.visibility-btn img {
+  width: 24px;
+  height: 24px;
+  transition: filter 0.3s ease;
+}
+
+.visibility-btn:hover img {
+  filter: brightness(0.8);
+}
+
+.forgot-password {
+  text-align: right;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  color: #020202;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  display: inline-block;
+  width: fit-content;
+  margin-left: auto;
+}
+
+.forgot-password::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 1px;
+  bottom: -2px;
+  left: 50%;
+  background: #E8373E;
+  transition: all 0.3s ease;
+}
+
+.forgot-password:hover {
+  color: #E8373E;
+}
+
+.forgot-password:hover::after {
+  width: 100%;
+  left: 0;
+}
+
+/* Login button */
+.login-btn {
+  width: 100%;
+  height: 50px;
+  background: #3A2D19;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 30px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.login-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.login-btn:hover {
+  background: #2A1F0F;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(58, 45, 25, 0.4);
+}
+
+.login-btn:hover::before {
+  left: 100%;
+}
+
+.login-btn:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(58, 45, 25, 0.3);
+}
+
+.login-btn:focus {
+  outline: 3px solid rgba(58, 45, 25, 0.3);
+  outline-offset: 2px;
+}
+
+.login-btn img {
+  width: 20px;
+  height: 20px;
+}
+
+/* Login button states */
+.login-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.login-btn.loading {
+  opacity: 0.8;
+}
+
+/* Social section */
+.social-section {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.social-btn {
+  flex: 1;
+  height: 44px;
+  background: white;
+  border: 1.5px solid #3A2D19;
+  border-radius: 6px;
+  color: #3A2D19;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  padding: 0 12px;
+  text-align: center;
+  line-height: 1;
+}
+
+.social-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  background: rgba(58, 45, 25, 0.05);
+  transition: width 0.3s ease;
+}
+
+.social-btn:hover {
+  background: #F8F8F8;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(58, 45, 25, 0.15);
+  border-color: #2A1F0F;
+}
+
+.social-btn:hover::before {
+  width: 100%;
+}
+
+.social-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 10px rgba(58, 45, 25, 0.1);
+}
+
+.social-btn:focus {
+  outline: 2px solid rgba(58, 45, 25, 0.3);
+  outline-offset: 1px;
+}
+
+.social-btn img {
+  width: 16px;
+  height: 16px;
+}
+
+/* Register text */
+.register-text {
+  text-align: center;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  color: #020202;
+}
+
+.register-text strong {
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.register-text strong::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 1px;
+  bottom: 0;
+  left: 50%;
+  background: #E8373E;
+  transition: all 0.3s ease;
+}
+
+.register-text strong:hover {
+  color: #E8373E;
+  background: rgba(232, 55, 62, 0.05);
+}
+
+.register-text strong:hover::after {
+  width: 100%;
+  left: 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .white-panel {
+    width: 100%;
+    clip-path: none;
+    background: rgba(255, 255, 255, 0.95);
+  }
+  
+  .food-images {
+    display: none;
+  }
+  
+  .login-section {
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  .brand-title {
+    font-size: 32px;
+  }
+  
+  .social-section {
+    flex-direction: column;
+  }
+  
+  .social-btn {
+    height: 48px;
+  }
+}
+
+/* Ripple effect */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  animation: ripple 600ms linear;
+  background-color: rgba(255, 255, 255, 0.3);
+  pointer-events: none;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Pulse animation for avatar */
+.avatar-icon {
+  width: 36px;
+  height: 36px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Loading animation for buttons */
+.login-btn.loading::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-top: 2px solid #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
