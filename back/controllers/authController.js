@@ -198,17 +198,17 @@ exports.ensureSuperAdmin = (req, res, next) => {
 };
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
-  // 1) Get user based on POSTed email
+  // 1) Get user based on POSTED email
   const user = await User.findOne({ email: req.body.email });
 
   if (!user) {
-    return next(new AppError("There is no user with that email adress.", 404));
+    return next(new AppError("There is no user with that email adress!", 404));
   }
   // 2) Generate the rangom token
   const resetToken = user.createPasswordResetToken();
   await user.save({ validateBeforeSave: false });
   // 3) Send it to user's email
-  // const message = `Forgot your password? Submit a PATCH request with your neew password and passwordConfrm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email! `;
+  // const message = `Forgot your password? Submit a PATCH request with your neew password and passwordConfrm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!!! `;
 
   try {
     const resetURL = `${req.protocol}://${req.get(

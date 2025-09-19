@@ -24,7 +24,7 @@ mongoose.connect(DB).then(() => {
   console.log("DB connection successful");
 });
 
-// Start server on specified port
+// Start server on specified port. If process not found default is 3000
 const port = process.env.port || 3000;
 const server = app.listen(port, () => {
   console.log(`App running on port ${port}...`);
