@@ -1,1 +1,1 @@
-Va el front
+Va el frontgit push origin --delete

@@ -28,16 +28,17 @@ const createSendToken = (user, statusCode, req, res) => {
   // Remove password from output
   user.password = undefined;
   // If the request expects HTML (form login), include a redirectUrl for frontend
-  const accept = req.headers.accept || '';
+  const accept = req.headers.accept || "";
   const payload = {
     status: "success",
     token,
     data: { user },
   };
-  if (accept.includes('text/html')) {
+  if (accept.includes("text/html")) {
     let redirectUrl;
-    if (user.role === 'super-admin') redirectUrl = '/super-admin/dashboard';
-    else if (user.role === 'restaurant-admin') redirectUrl = '/restaurant/dashboard';
+    if (user.role === "super-admin") redirectUrl = "/super-admin/dashboard";
+    else if (user.role === "restaurant-admin")
+      redirectUrl = "/restaurant/dashboard";
     else redirectUrl = null;
     payload.redirectUrl = redirectUrl;
   }
@@ -189,7 +190,9 @@ exports.restrictTo =
 // Ensure the authenticated user is a Super Admin
 exports.ensureSuperAdmin = (req, res, next) => {
   if (!req.user) {
-    return next(new AppError("You are not logged in! Please log in to get access", 401));
+    return next(
+      new AppError("You are not logged in! Please log in to get access", 401)
+    );
   }
 
   if (req.user.role !== "super-admin") {
@@ -291,7 +294,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 // Helper for determining redirect URL by role (exported for tests)
 exports.getRedirectUrlForUser = (user) => {
   if (!user || !user.role) return null;
-  if (user.role === 'super-admin') return '/super-admin/dashboard';
-  if (user.role === 'restaurant-admin') return '/restaurant/dashboard';
+  if (user.role === "super-admin") return "/super-admin/dashboard";
+  if (user.role === "restaurant-admin") return "/restaurant/dashboard";
   return null;
 };
