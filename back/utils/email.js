@@ -1,20 +1,21 @@
-const nodemailer = require('nodemailer');
-const pug = require('pug');
-const htmlToText = require('html-to-text');
+// Import required modules for email functionality
+const nodemailer = require("nodemailer");
+const pug = require("pug");
+const htmlToText = require("html-to-text");
 
-module.exports = class Email {
+class Email {
   constructor(user, url) {
     this.to = user.email;
-    this.firstName = user.name.split(' ')[0];
+    this.firstName = user.name.split(" ")[0];
     this.url = url;
-    this.from = `Jonas Schedtmann <${process.env.EMAIL_FROM}>`;
+    this.from = `Platogo <${process.env.EMAIL_FROM}>`;
   }
 
   newTransport() {
-    if (process.env.NODE_ENV === 'production') {
-      // Sendgrid
+    if (process.env.NODE_ENV === "production") {
+      // SendGrid
       return nodemailer.createTransport({
-        service: 'SendGrid',
+        service: "SendGrid",
         auth: {
           user: process.env.SENDGRID_USERNAME,
           pass: process.env.SENDGRID_PASSWORD,
@@ -22,6 +23,7 @@ module.exports = class Email {
       });
     }
 
+    // SMTP (desarrollo)
     return nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
       port: process.env.EMAIL_PORT,
@@ -32,75 +34,38 @@ module.exports = class Email {
     });
   }
 
-  // Send the actual email
   async send(template, subject) {
-    // 1) Render HTML based on pug template
+    // 1) Render HTML con Pug
     const html = pug.renderFile(`${__dirname}/../views/email/${template}.pug`, {
       firstName: this.firstName,
       url: this.url,
       subject,
     });
-    // 2)Define email options
+
+    // 2) Opciones del correo
     const mailOptions = {
-      from: `Jonas Schedtmann <${this.from}>`,
+      from: this.from,
       to: this.to,
       subject,
       html,
       text: htmlToText.convert(html),
-      // html:
     };
 
-    // 3) Create transport and send email
+    // 3) Enviar el correo
     await this.newTransport().sendMail(mailOptions);
   }
 
   async sendWelcome() {
-    await this.send('welcome', 'Welcome to the Natours Family!');
+    await this.send("welcome", "Welcome to the platogo Family!");
   }
 
   async sendPasswordReset() {
     await this.send(
-      'passwordReset',
-      'Your password reset token (valid for only 10 minutes)',
+      "passwordReset",
+      "Your password reset token (valid for only 10 minutes)"
     );
   }
-};
+}
 
-// const sendEmail = (options) => {
-//   // 1) Create transporter
-//   const transporter = nodemailer.createTransport({
-//     service: 'Gmail',
-//     auth: {
-//       user: process.env.EMAIL_USERNAME,
-//       pass: process.env.EMAIL_PASSWORD,
-//     },
-//     // Activate in gmail "less secure app" option
-//   });
-//   // 2) Define email options
-//   // 3) Actually send the email
-// };
-
-// //////////////////////////////////////////////
-
-// const sendEmail = async (options) => {
-// 1) Create transporter
-// const transporter = nodemailer.createTransport({
-//   host: process.env.EMAIL_HOST,
-//   port: process.env.EMAIL_PORT,
-//   auth: {
-//     user: process.env.EMAIL_USERNAME,
-//     pass: process.env.EMAIL_PASSWORD,
-//   },
-// });
-// 2) Define email options
-// const mailOptions = {
-//   from: 'Jonas Schedtmann <hello@jonas.io>',
-//   to: options.email,
-//   subject: options.subject,
-//   text: options.message,
-// };
-// 3) Actually send the email
-// await transporter.sendMail(mailOptions);
-// };
-
-// module.exports = sendEmail;
+// Exporta la clase bien definida
+module.exports = Email;
