@@ -8,8 +8,8 @@ restaurantRouter.use(authController.protect);
 
 restaurantRouter
   .route("/")
-  .get(restaurantController.getAllRestaurants)
-  .post(restaurantController.createRestaurant);
+  .get(authController.ensureSuperAdmin, restaurantController.getAllRestaurants)
+  .post(authController.ensureSuperAdmin, restaurantController.createRestaurant);
 
 restaurantRouter
   .route("/:id")
