@@ -1,8 +1,10 @@
-const { ensureSuperAdmin } = require('../controllers/authController');
+// Tests for ensureSuperAdmin middleware
+const { ensureSuperAdmin } = require("../controllers/authController");
 
-describe('ensureSuperAdmin middleware', () => {
-  test('allows when user is super-admin', () => {
-    const req = { user: { role: 'super-admin' } };
+describe("ensureSuperAdmin middleware", () => {
+  // Should allow when user is super-admin
+  test("allows when user is super-admin", () => {
+    const req = { user: { role: "super-admin" } };
     const res = {};
     let called = false;
     const next = (err) => {
@@ -14,8 +16,9 @@ describe('ensureSuperAdmin middleware', () => {
     expect(called).toBe(true);
   });
 
-  test('returns 403 when user is not super-admin', () => {
-    const req = { user: { role: 'restaurant-admin' } };
+  // Should return 403 when user is not super-admin
+  test("returns 403 when user is not super-admin", () => {
+    const req = { user: { role: "restaurant-admin" } };
     const res = {};
     const next = (err) => {
       expect(err).toBeDefined();
@@ -26,7 +29,8 @@ describe('ensureSuperAdmin middleware', () => {
     ensureSuperAdmin(req, res, next);
   });
 
-  test('returns 401 when not logged in', () => {
+  // Should return 401 when not logged in
+  test("returns 401 when not logged in", () => {
     const req = {};
     const res = {};
     const next = (err) => {

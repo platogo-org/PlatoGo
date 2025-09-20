@@ -1,0 +1,63 @@
+# Global ignores for PlatoGo monorepo
+
+# Node dependencies
+node_modules/
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime caches & coverage
+.cache/
+**/.cache/
+coverage/
+.nyc_output/
+
+# Build artifacts
+back/public/build/
+front/build/
+
+# Environment & secrets
+*.env
+*.env.*
+back/config.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# OS / Editor junk
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+
+# Jest / Testing
+jest-html-reporters-*
+
+# Lockfiles (decide if you want to commit both; keeping them tracked usually helps reproducibility)
+# Uncomment to ignore if desired:
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Generated assets
+*.tar
+*.tgz
+
+# Debug / profiling
+*.pid
+*.seed
+
+# Misc
+*.txt
