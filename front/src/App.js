@@ -1,7 +1,10 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import LoginDesign from './LoginDesign';
+import ClientDesign from './ClientDesign';
+// import ChefDesign from './ChefDesign';
 import SuperAdminDashboard from './components/SuperAdminDashboard';
 import RestaurantAdminDashboard from './components/RestaurantAdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -35,6 +38,9 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+
+            {/* Client Design route */}
+            <Route path="/client" element={<ClientDesign />} />
             
             {/* Default redirect to login */}
             <Route path="/" element={<Navigate to="/login" replace />} />
