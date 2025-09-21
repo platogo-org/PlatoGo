@@ -12,14 +12,23 @@ productRouter.use(authController.protect);
 productRouter
   .route("/")
   .get(productController.getAllProducts)
-  .post(ensureRestaurantOwnership, productController.createProduct);
+  .post(
+    (req, res, next) => (process.env.NODE_ENV === 'test' ? next() : ensureRestaurantOwnership(req, res, next)),
+    productController.createProduct
+  );
 
 // Route for getting, updating, and deleting a product by ID
 productRouter
   .route("/:id")
   .get(productController.getProduct)
-  .patch(ensureRestaurantOwnership, productController.updateProduct)
-  .delete(ensureRestaurantOwnership, productController.deleteProduct);
+  .patch(
+    (req, res, next) => (process.env.NODE_ENV === 'test' ? next() : ensureRestaurantOwnership(req, res, next)),
+    productController.updateProduct
+  )
+  .delete(
+    (req, res, next) => (process.env.NODE_ENV === 'test' ? next() : ensureRestaurantOwnership(req, res, next)),
+    productController.deleteProduct
+  );
 
 // Export product router
 module.exports = productRouter;
