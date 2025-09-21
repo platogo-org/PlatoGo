@@ -1,10 +1,1 @@
-###############################
-# Backend specific ignores    #
-###############################
-node_modules/
-*.env
-config.env
-.cache/
-*.txt
-
-# Rely on root .gitignore for shared patterns
+# Backend specific overrides (empty) - project uses root .gitignore
