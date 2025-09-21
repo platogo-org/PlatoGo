@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './contexts/AuthContext';
 import LoginDesign from './LoginDesign';
 import ClientDesign from './ClientDesign';
-// import ChefDesign from './ChefDesign';
+import ChefDesign from './ChefDesign';
 import SuperAdminDashboard from './components/SuperAdminDashboard';
 import RestaurantAdminDashboard from './components/RestaurantAdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -41,7 +41,10 @@ function App() {
 
             {/* Client Design route */}
             <Route path="/client" element={<ClientDesign />} />
-            
+
+            { /* ChefDesign route */ }
+            <Route path="/chef" element={<ChefDesign />} />
+
             {/* Default redirect to login */}
             <Route path="/" element={<Navigate to="/login" replace />} />
             
