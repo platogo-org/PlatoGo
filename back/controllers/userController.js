@@ -110,13 +110,8 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 // Controller to get a single user by ID
 exports.getUser = factory.getOne(User);
 
-// Controller to create a user (not implemented, use signup instead)
-exports.createUser = (req, res) => {
-  res.status(500).json({
-    status: "error",
-    messaje: "This route is not defined! Please use sign up instead",
-  });
-};
+// Controller to create a user (for super-admin)
+exports.createUser = factory.createOne(User);
 
 // Controller to update a user by ID (do NOT use for passwords)
 exports.updateUser = factory.updateOne(User);

@@ -28,18 +28,16 @@ usersRouter.patch(
 usersRouter.delete("/deleteMe", userController.deleteMe);
 
 // Only super-admin can access the following user management routes
-usersRouter.use(authController.ensureSuperAdmin);
-
-// Admin routes for managing users
+// Protect create, update, and delete user operations
 usersRouter
   .route("/")
-  .get(userController.getAllUsers)
-  .post(userController.createUser);
+  .get(authController.ensureSuperAdmin, userController.getAllUsers)
+  .post(authController.ensureSuperAdmin, userController.createUser);
 usersRouter
   .route("/:id")
-  .get(userController.getUser)
-  .patch(userController.updateUser)
-  .delete(userController.deleteUser);
+  .get(authController.ensureSuperAdmin, userController.getUser)
+  .patch(authController.ensureSuperAdmin, userController.updateUser)
+  .delete(authController.ensureSuperAdmin, userController.deleteUser);
 
 // Export users router
 module.exports = usersRouter;
