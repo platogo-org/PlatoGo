@@ -16,10 +16,6 @@ pnpm-debug.log*
 **/.cache/
 coverage/
 .nyc_output/
-**/coverage/
-**/lcov-report/
-back/tests/report/
-**/tests/report/
 
 # Build artifacts
 back/public/build/
@@ -65,12 +61,3 @@ jest-html-reporters-*
 
 # Misc
 *.txt
-
-# Frontend testing artifacts
-front/junit.xml
-front/coverage/
-
-# Storybook (if later added)
-storybook-static/
-front/node_modules/
-front/.cache/

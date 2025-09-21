@@ -1,49 +1,49 @@
+// Import mongoose for schema and model creation
 const mongoose = require("mongoose");
 
+// Define Product schema
 const productSchema = new mongoose.Schema(
   {
     nombre: {
       type: String,
-      required: [true, "A product must have a name"],
+      required: [true, "A product must have a name"], // Product name is required
       trim: true,
     },
     ingredientes: [
       {
         type: String,
-        trim: true,
+        trim: true, // List of ingredients
       },
     ],
     costo: {
       type: Number,
-      required: [true, "A product must have a price"],
+      required: [true, "A product must have a price"], // Product price is required
       min: [0, "Price must be greater than 0"],
     },
-    // Referencia al restaurante
     restaurant: {
       type: mongoose.Schema.ObjectId,
       ref: "Restaurant",
-      required: [true, "A product must belong to a restaurant"],
+      required: [true, "A product must belong to a restaurant"], // Reference to Restaurant
     },
-    // Referencias a categorías
     categorias: [
       {
         type: mongoose.Schema.ObjectId,
-        ref: "Category",
+        ref: "Category", // Reference to Category
       },
     ],
     active: {
       type: Boolean,
-      default: true,
+      default: true, // Product is active by default
     },
   },
   {
-    timestamps: true,
+    timestamps: true, // Add createdAt and updatedAt fields
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   }
 );
 
-// Index compuesto para búsquedas eficientes
+// Compound indexes for efficient queries
 productSchema.index({ restaurant: 1, active: 1 });
 productSchema.index({ categorias: 1 });
 productSchema.index({ nombre: 1, restaurant: 1 }, { unique: true });
@@ -56,7 +56,7 @@ productSchema.pre(/^find/, function(next) {
   next();
 });
 
-// Middleware para populate automático
+// Middleware to automatically populate references on find queries
 productSchema.pre(/^find/, function (next) {
   this.populate({
     path: "restaurant",
@@ -68,6 +68,6 @@ productSchema.pre(/^find/, function (next) {
   next();
 });
 
+// Create and export Product model
 const Product = mongoose.model("Product", productSchema);
-
 module.exports = Product;
