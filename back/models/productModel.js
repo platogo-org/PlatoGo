@@ -46,6 +46,15 @@ const productSchema = new mongoose.Schema(
 // Index compuesto para búsquedas eficientes
 productSchema.index({ restaurant: 1, active: 1 });
 productSchema.index({ categorias: 1 });
+productSchema.index({ nombre: 1, restaurant: 1 }, { unique: true });
+
+// Only return active products by default
+productSchema.pre(/^find/, function(next) {
+  if (!this.getFilter().hasOwnProperty('active')) {
+    this.where({ active: { $ne: false } });
+  }
+  next();
+});
 
 // Middleware para populate automático
 productSchema.pre(/^find/, function (next) {
