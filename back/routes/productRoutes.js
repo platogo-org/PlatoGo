@@ -13,7 +13,10 @@ productRouter
   .route("/")
   .get(productController.getAllProducts)
   .post(
-    (req, res, next) => (process.env.NODE_ENV === 'test' ? next() : ensureRestaurantOwnership(req, res, next)),
+    (req, res, next) =>
+      process.env.NODE_ENV === "test"
+        ? next()
+        : ensureRestaurantOwnership(req, res, next),
     productController.createProduct
   );
 
@@ -22,11 +25,17 @@ productRouter
   .route("/:id")
   .get(productController.getProduct)
   .patch(
-    (req, res, next) => (process.env.NODE_ENV === 'test' ? next() : ensureRestaurantOwnership(req, res, next)),
+    (req, res, next) =>
+      process.env.NODE_ENV === "test"
+        ? next()
+        : ensureRestaurantOwnership(req, res, next),
     productController.updateProduct
   )
   .delete(
-    (req, res, next) => (process.env.NODE_ENV === 'test' ? next() : ensureRestaurantOwnership(req, res, next)),
+    (req, res, next) =>
+      process.env.NODE_ENV === "test"
+        ? next()
+        : ensureRestaurantOwnership(req, res, next),
     productController.deleteProduct
   );
 
