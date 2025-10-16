@@ -1,0 +1,22 @@
+services:
+  api:
+    build: ./back
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - appnet
+  web:
+    build: ./front
+    ports:
+      - "80:80"
+    environment:
+      - API_URL=http://api:4000
+    depends_on:
+      - api
+    networks:
+      - appnet
+networks:
+  appnet:
+    driver: bridge
