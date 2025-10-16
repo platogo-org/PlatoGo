@@ -27,3 +27,4 @@ categorySchema.virtual("productos", {
 
 // Create and export Category model
 const Category = mongoose.model("Category", categorySchema);
+module.exports = Category;
