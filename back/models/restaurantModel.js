@@ -1,60 +1,60 @@
+// Import mongoose for schema and model creation
 const mongoose = require("mongoose");
 
+// Define Restaurant schema
 const restaurantSchema = new mongoose.Schema(
   {
     nombre: {
       type: String,
-      required: [true, "A restaurant must have a name"],
+      required: [true, "A restaurant must have a name"], // Restaurant name is required
       trim: true,
     },
     direccion: {
       type: String,
-      required: [true, "A restaurant must have an address"],
+      required: [true, "A restaurant must have an address"], // Address is required
       trim: true,
     },
     horario: {
       type: Date,
-      required: [true, "A restaurant must have a schedule"],
+      required: [true, "A restaurant must have a schedule"], // Schedule is required
     },
     datosfacturacion: {
       type: String,
       default: null,
-      trim: true,
+      trim: true, // Optional billing data
     },
-    // Referencia al usuario propietario
     usuario: {
       type: mongoose.Schema.ObjectId,
       ref: "User",
-      required: [true, "A restaurant must have an owner"],
+      required: [true, "A restaurant must have an owner"], // Reference to User (owner)
     },
-    // Referencias virtuales a productos y pedidos
     active: {
       type: Boolean,
-      default: true,
+      default: true, // Restaurant is active by default
     },
   },
   {
-    timestamps: true,
+    timestamps: true, // Add createdAt and updatedAt fields
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   }
 );
 
-// Virtual populate para productos
+// Virtual populate for products in this restaurant
 restaurantSchema.virtual("productos", {
   ref: "Product",
   foreignField: "restaurant",
   localField: "_id",
 });
 
-// Virtual populate para pedidos
+// Virtual populate for orders in this restaurant
 restaurantSchema.virtual("pedidos", {
   ref: "Order",
   foreignField: "restaurant",
   localField: "_id",
 });
 
-// Middleware para populate automático del usuario
+// Middleware to automatically populate owner (usuario) on find queries
 restaurantSchema.pre(/^find/, function (next) {
   this.populate({
     path: "usuario",
@@ -63,6 +63,6 @@ restaurantSchema.pre(/^find/, function (next) {
   next();
 });
 
+// Create and export Restaurant model
 const Restaurant = mongoose.model("Restaurant", restaurantSchema);
-
 module.exports = Restaurant;

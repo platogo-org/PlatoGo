@@ -1,3 +1,4 @@
+// Import required modules
 const multer = require("multer");
 const sharp = require("sharp");
 const AppError = require("../utils/appError");
@@ -5,8 +6,10 @@ const User = require("./../models/userModel");
 const catchAsync = require("./../utils/catchAsync");
 const factory = require("./handlerFactory");
 
+// Configure multer to store uploaded files in memory
 const multerStorage = multer.memoryStorage();
 
+// Filter to allow only image uploads
 const multerFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image")) {
     cb(null, true);
@@ -15,13 +18,16 @@ const multerFilter = (req, file, cb) => {
   }
 };
 
+// Multer upload configuration
 const upload = multer({
   storage: multerStorage,
   fileFilter: multerFilter,
 });
 
+// Middleware to handle single photo upload for user
 exports.uploadUserPhoto = upload.single("photo");
 
+// Middleware to resize uploaded user photo and save to disk
 exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
   if (!req.file) return next();
 
@@ -35,6 +41,7 @@ exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
   next();
 });
 
+// Helper to filter allowed fields from an object
 const filterObj = (obj, ...alowedFields) => {
   const newObj = {};
   Object.keys(obj).forEach((el) => {
@@ -56,17 +63,17 @@ const filterObj = (obj, ...alowedFields) => {
 //   });
 // });
 
+// Controller to get all users
 exports.getAllUsers = factory.getAll(User);
 
+// Middleware to set req.params.id to current user's id
 exports.getMe = (req, res, next) => {
   req.params.id = req.user.id;
   next();
 };
 
+// Controller to update current user's data (except password)
 exports.updateMe = catchAsync(async (req, res, next) => {
-  // console.log(req.file);
-  // console.log(req.body);
-  // 1) Create error if user POSTs password data
   if (req.body.password || req.body.passwordConfirm)
     return next(
       new AppError(
@@ -74,10 +81,10 @@ exports.updateMe = catchAsync(async (req, res, next) => {
         400
       )
     );
-  // 2) Filter out unwanted field names that are not allowed to be updated
+  // Filter out unwanted field names
   const fillteredBody = filterObj(req.body, "name", "email");
   if (req.file) fillteredBody.photo = req.file.filename;
-  // 3) Update user document
+  // Update user document
   const updatedUser = await User.findByIdAndUpdate(req.user.id, fillteredBody, {
     new: true,
     runValidators: true,
@@ -91,8 +98,8 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   });
 });
 
+// Controller to deactivate current user's account
 exports.deleteMe = catchAsync(async (req, res, next) => {
-  // console.log(req);
   await User.findByIdAndUpdate(req.user.id, { active: false });
   res.status(204).json({
     status: "success",
@@ -100,18 +107,16 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
   });
 });
 
+// Controller to get a single user by ID
 exports.getUser = factory.getOne(User);
 
-exports.createUser = (req, res) => {
-  res.status(500).json({
-    status: "error",
-    messaje: "This route is not defined! Please use sign up instead",
-  });
-};
+// Controller to create a user (for super-admin)
+exports.createUser = factory.createOne(User);
 
-// Do NOT update passwords with this!
+// Controller to update a user by ID (do NOT use for passwords)
 exports.updateUser = factory.updateOne(User);
 
+// Controller to delete a user by ID
 exports.deleteUser = factory.deleteOne(User);
 // exports.deleteUser = (req, res) => {
 //   res.status(500).json({

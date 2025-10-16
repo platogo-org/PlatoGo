@@ -1,39 +1,42 @@
+// Import required modules
 const crypto = require("crypto");
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 
-// name, email, photo, password, passwordConfirm
+// User fields: name, email, photo, password, passwordConfirm
 
+// User roles definition
 const ROLES = {
-  SUPER_ADMIN: 'super-admin',
-  RESTAURANT_ADMIN: 'restaurant-admin',
-  USER: 'user'
+  SUPER_ADMIN: "super-admin",
+  RESTAURANT_ADMIN: "restaurant-admin",
+  USER: "user",
 };
 
+// User schema definition
 const userShcema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, "A user must have a name"],
+    required: [true, "A user must have a name"], // User must have a name
   },
   email: {
     type: String,
-    required: [true, "A user must have a mail"],
+    required: [true, "A user must have a mail"], // User must have an email
     unique: true,
     lowercase: true,
     trim: true,
-    validate: [validator.isEmail, "The String must be a valid Email"],
+    validate: [validator.isEmail, "The String must be a valid Email"], // Email validation
   },
   role: {
     type: String,
-    enum: [ROLES.SUPER_ADMIN, ROLES.RESTAURANT_ADMIN, ROLES.USER],
-    default: ROLES.USER,
+    enum: ["super-admin", "restaurant-admin"], // Allowed roles
+    default: "restaurant-admin",
   },
   password: {
     type: String,
     required: true,
-    minlength: [8, "A password must have more or equal than 8 characters"],
-    select: false,
+    minlength: [8, "A password must have more or equal than 8 characters"], // Minimum length
+    select: false, // Do not return password in queries
   },
   passwordConfirm: {
     type: String,
@@ -41,43 +44,42 @@ const userShcema = new mongoose.Schema({
     validate: {
       // This only works on CREATE AND SAVE!!!
       validator: function (el) {
-        return el === this.password;
+        return el === this.password; // Password confirmation must match
       },
       message: "Passwords are not the same",
     },
   },
-  passwordChangedAt: Date,
-  passwordResetToken: String,
-  passwordResetExpires: Date,
+  passwordChangedAt: Date, // Date when password was changed
+  passwordResetToken: String, // Token for password reset
+  passwordResetExpires: Date, // Expiration for password reset token
   active: {
     type: Boolean,
     default: true,
-    select: false,
+    select: false, // Do not return 'active' in queries
   },
   restaurant: {
     type: mongoose.Schema.ObjectId,
-    ref: "Restaurant",
+    ref: "Restaurant", // Reference to Restaurant
     default: null,
   },
 });
 
+// Hash password before saving if it was modified
 userShcema.pre("save", async function (next) {
-  // Only run this function is password was actually modified
   if (!this.isModified("password")) return next();
-  // Hash the password with cost of 12
-  this.password = await bcrypt.hash(this.password, 12);
-  // Delete password confirm field
-  this.passwordConfirm = undefined;
+  this.password = await bcrypt.hash(this.password, 12); // Hash password
+  this.passwordConfirm = undefined; // Remove passwordConfirm field
   next();
 });
 
+// Set passwordChangedAt when password is updated
 userShcema.pre("save", function (next) {
   if (!this.isModified("password") || this.isNew) return next();
-
   this.passwordChangedAt = Date.now() - 1000;
   next();
 });
 
+// Compare input password with hashed password
 userShcema.methods.correctPassword = async function (
   candidatePassword,
   userPassword
@@ -85,39 +87,36 @@ userShcema.methods.correctPassword = async function (
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
+// Check if password was changed after JWT was issued
 userShcema.methods.changePasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
     const changedTimeStamp = parseInt(
       this.passwordChangedAt.getTime() / 1000,
       10
     );
-    // console.log(changedTimeStamp, JWTTimestamp);
     return JWTTimestamp < changedTimeStamp;
   }
   return false;
 };
 
+// Exclude inactive users from queries
 userShcema.pre(/^find/, function (next) {
-  // this points to current query
   this.find({ active: { $ne: false } });
   next();
 });
 
+// Generate password reset token and set expiration
 userShcema.methods.createPasswordResetToken = function () {
   const resetToken = crypto.randomBytes(32).toString("hex");
-
   this.passwordResetToken = crypto
     .createHash("sha256")
     .update(resetToken)
     .digest("hex");
-
-  // console.log({ resetToken }, this.passwordResetToken);
-
-  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
-
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
   return resetToken;
 };
 
+// Create User model and export
 const User = mongoose.model("User", userShcema);
 module.exports = User;
 module.exports.ROLES = ROLES;

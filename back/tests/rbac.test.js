@@ -1,9 +1,11 @@
-const { ensureRestaurantOwnership } = require('../utils/authorization');
-const AppError = require('../utils/appError');
+// Tests for ensureRestaurantOwnership middleware
+const { ensureRestaurantOwnership } = require("../utils/authorization");
+const AppError = require("../utils/appError");
 
-describe('ensureRestaurantOwnership', () => {
-  test('allows super-admin without checking restaurant', () => {
-    const req = { user: { role: 'super-admin' } };
+describe("ensureRestaurantOwnership", () => {
+  // Should allow super-admin without checking restaurant
+  test("allows super-admin without checking restaurant", () => {
+    const req = { user: { role: "super-admin" } };
     const res = {};
     let called = false;
     const next = (err) => {
@@ -15,7 +17,8 @@ describe('ensureRestaurantOwnership', () => {
     });
   });
 
-  test('denies non-logged-in user', () => {
+  // Should deny access for non-logged-in user
+  test("denies non-logged-in user", () => {
     const req = {};
     const res = {};
     const next = (err) => {
@@ -25,8 +28,12 @@ describe('ensureRestaurantOwnership', () => {
     ensureRestaurantOwnership(req, res, next);
   });
 
-  test('allows restaurant-admin for own restaurant', () => {
-    const req = { user: { role: 'restaurant-admin', restaurant: 'abc123' }, params: { id: 'abc123' } };
+  // Should allow restaurant-admin for their own restaurant
+  test("allows restaurant-admin for own restaurant", () => {
+    const req = {
+      user: { role: "restaurant-admin", restaurant: "abc123" },
+      params: { id: "abc123" },
+    };
     const res = {};
     let called = false;
     const next = (err) => {
@@ -38,8 +45,12 @@ describe('ensureRestaurantOwnership', () => {
     });
   });
 
-  test('denies restaurant-admin for other restaurant', () => {
-    const req = { user: { role: 'restaurant-admin', restaurant: 'abc123' }, params: { id: 'other' } };
+  // Should deny restaurant-admin for other restaurant
+  test("denies restaurant-admin for other restaurant", () => {
+    const req = {
+      user: { role: "restaurant-admin", restaurant: "abc123" },
+      params: { id: "other" },
+    };
     const res = {};
     const next = (err) => {
       expect(err).toBeDefined();

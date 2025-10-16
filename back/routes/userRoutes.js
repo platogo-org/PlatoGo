@@ -1,9 +1,11 @@
+// Import required modules and controllers
 const express = require("express");
 const userController = require("../controllers/userController");
 const authController = require("../controllers/authController");
 
 const usersRouter = express.Router();
 
+// Public routes for authentication and password management
 usersRouter.post("/signup", authController.signup);
 usersRouter.post("/login", authController.login);
 usersRouter.get("/logout", authController.logout);
@@ -11,11 +13,11 @@ usersRouter.get("/logout", authController.logout);
 usersRouter.post("/forgotPassword", authController.forgotPassword);
 usersRouter.patch("/resetPassword/:token", authController.resetPassword);
 
-// Protect all routes after this middleware
+// Protect all routes after this middleware (require authentication)
 usersRouter.use(authController.protect);
 
+// Authenticated user routes
 usersRouter.patch("/updateMyPassword", authController.updatePassword);
-
 usersRouter.get("/me", userController.getMe, userController.getUser);
 usersRouter.patch(
   "/updateme",
@@ -25,18 +27,17 @@ usersRouter.patch(
 );
 usersRouter.delete("/deleteMe", userController.deleteMe);
 
-// Use ensureSuperAdmin middleware on global admin routes
 // Only super-admin can access the following user management routes
-usersRouter.use(authController.ensureSuperAdmin);
-
+// Protect create, update, and delete user operations
 usersRouter
   .route("/")
-  .get(userController.getAllUsers)
-  .post(userController.createUser);
+  .get(authController.ensureSuperAdmin, userController.getAllUsers)
+  .post(authController.ensureSuperAdmin, userController.createUser);
 usersRouter
   .route("/:id")
-  .get(userController.getUser)
-  .patch(userController.updateUser)
-  .delete(userController.deleteUser);
+  .get(authController.ensureSuperAdmin, userController.getUser)
+  .patch(authController.ensureSuperAdmin, userController.updateUser)
+  .delete(authController.ensureSuperAdmin, userController.deleteUser);
 
+// Export users router
 module.exports = usersRouter;

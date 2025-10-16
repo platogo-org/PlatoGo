@@ -1,3 +1,4 @@
+// Import required modules
 const crypto = require("crypto");
 const { promisify } = require("util");
 const jwt = require("jsonwebtoken");
@@ -6,38 +7,47 @@ const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const Email = require("./../utils/email");
 
+// Helper to sign JWT token with user id and role
 const signToken = (id, role) =>
   jwt.sign({ id, role }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 
+/**
+ * Helper to create and send JWT token in cookie and response
+ * @param {Object} user - User object
+ * @param {number} statusCode - HTTP status code
+ * @param {Object} req - Express request
+ * @param {Object} res - Express response
+ */
 const createSendToken = (user, statusCode, req, res) => {
   const cookieOptions = {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
-    // HEROKU
-    // secure: req.secure || req.headers['x-forwarded-proto'] === 'https'
+    // secure: req.secure || req.headers['x-forwarded-proto'] === 'https' // For Heroku
   };
-  // PROD DEV
+  // Set secure cookie in production
   if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
 
   const token = signToken(user._id, user.role);
   res.cookie("jwt", token, cookieOptions);
-  // Remove password from output
-  user.password = undefined;
-  // If the request expects HTML (form login), include a redirectUrl for frontend
-  const accept = req.headers.accept || '';
+  user.password = undefined; // Remove password from output
+
+  // Prepare response payload
+  const accept = req.headers.accept || "";
   const payload = {
     status: "success",
     token,
     data: { user },
   };
-  if (accept.includes('text/html')) {
+  // Add redirectUrl for HTML requests
+  if (accept.includes("text/html")) {
     let redirectUrl;
-    if (user.role === 'super-admin') redirectUrl = '/super-admin/dashboard';
-    else if (user.role === 'restaurant-admin') redirectUrl = '/restaurant/dashboard';
+    if (user.role === "super-admin") redirectUrl = "/super-admin/dashboard";
+    else if (user.role === "restaurant-admin")
+      redirectUrl = "/restaurant/dashboard";
     else redirectUrl = null;
     payload.redirectUrl = redirectUrl;
   }
@@ -45,6 +55,7 @@ const createSendToken = (user, statusCode, req, res) => {
   res.status(statusCode).json(payload);
 };
 
+// Signup controller: create new user and send welcome email
 exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
     name: req.body.name,
@@ -55,20 +66,11 @@ exports.signup = catchAsync(async (req, res, next) => {
     role: req.body.role,
   });
   const url = `${req.protocol}://${req.get("host")}/me`;
-  // console.log(url);
   await new Email(newUser, url).sendWelcome();
   createSendToken(newUser, 201, req, res);
-
-  // const token = signToken(newUser._id);
-  // res.status(201).json({
-  //   status: 'success',
-  //   token,
-  //   data: {
-  //     user: newUser,
-  //   },
-  // });
 });
 
+// Login controller: authenticate user and send JWT
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -85,13 +87,9 @@ exports.login = catchAsync(async (req, res, next) => {
   }
   // 3) If everything ok, send token to client
   createSendToken(user, 200, req, res);
-  // const token = signToken(user._id);
-  // res.status(200).json({
-  //   status: 'success',
-  //   token,
-  // });
 });
 
+// Logout controller: clear JWT cookie
 exports.logout = (req, res) => {
   res.cookie("jwt", "loggedout", {
     expires: new Date(Date.now() + 10 * 1000),
@@ -100,8 +98,9 @@ exports.logout = (req, res) => {
   res.status(200).json({ status: "success" });
 };
 
+// Middleware to protect routes (require authentication)
 exports.protect = catchAsync(async (req, res, next) => {
-  // 1) Getting token and check if it's there
+  // 1) Get token from header or cookie
   let token;
   if (
     req.headers.authorization &&
@@ -111,7 +110,6 @@ exports.protect = catchAsync(async (req, res, next) => {
   } else if (req.cookies.jwt) {
     token = req.cookies.jwt;
   }
-  // console.log(token);
 
   if (!token) {
     return next(
@@ -119,9 +117,8 @@ exports.protect = catchAsync(async (req, res, next) => {
     );
   }
 
-  // 2) Verification token
+  // 2) Verify token
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-  // console.log(decoded);
 
   // 3) Check if user still exists
   const currentUser = await User.findById(decoded.id);
@@ -131,7 +128,7 @@ exports.protect = catchAsync(async (req, res, next) => {
     );
   }
 
-  // 4) check if user changed password after token was issued
+  // 4) Check if user changed password after token was issued
   if (currentUser.changePasswordAfter(decoded.iat)) {
     return next(
       new AppError("User recently changed password! Please log in again.", 401)
@@ -140,7 +137,6 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   req.user = currentUser;
   res.locals.user = currentUser;
-  // GRANT ACCESS TO PROTECTED ROUTE
   next();
 });
 
@@ -189,7 +185,9 @@ exports.restrictTo =
 // Ensure the authenticated user is a Super Admin
 exports.ensureSuperAdmin = (req, res, next) => {
   if (!req.user) {
-    return next(new AppError("You are not logged in! Please log in to get access", 401));
+    return next(
+      new AppError("You are not logged in! Please log in to get access", 401)
+    );
   }
 
   if (req.user.role !== "super-admin") {
@@ -200,17 +198,17 @@ exports.ensureSuperAdmin = (req, res, next) => {
 };
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
-  // 1) Get user based on POSTed email
+  // 1) Get user based on POSTED email
   const user = await User.findOne({ email: req.body.email });
 
   if (!user) {
-    return next(new AppError("There is no user with that email adress.", 404));
+    return next(new AppError("There is no user with that email adress!", 404));
   }
   // 2) Generate the rangom token
   const resetToken = user.createPasswordResetToken();
   await user.save({ validateBeforeSave: false });
   // 3) Send it to user's email
-  // const message = `Forgot your password? Submit a PATCH request with your neew password and passwordConfrm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email! `;
+  // const message = `Forgot your password? Submit a PATCH request with your neew password and passwordConfrm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!!! `;
 
   try {
     const resetURL = `${req.protocol}://${req.get(
@@ -291,7 +289,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 // Helper for determining redirect URL by role (exported for tests)
 exports.getRedirectUrlForUser = (user) => {
   if (!user || !user.role) return null;
-  if (user.role === 'super-admin') return '/super-admin/dashboard';
-  if (user.role === 'restaurant-admin') return '/restaurant/dashboard';
+  if (user.role === "super-admin") return "/super-admin/dashboard";
+  if (user.role === "restaurant-admin") return "/restaurant/dashboard";
   return null;
 };
