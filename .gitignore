@@ -73,4 +73,5 @@ front/coverage/
 # Storybook (if later added)
 storybook-static/
 front/node_modules/
+front/node_modules/*
 front/.cache/

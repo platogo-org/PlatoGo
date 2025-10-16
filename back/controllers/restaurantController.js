@@ -1,5 +1,5 @@
 // Import Restaurant model and generic handler factory
-const Restaurant = require("./../models/RestaurantModel");
+const Restaurant = require("./../models/restaurantModel");
 const factory = require("./handlerFactory");
 
 // Controller to create a new restaurant
