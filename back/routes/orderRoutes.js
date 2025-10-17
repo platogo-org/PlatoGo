@@ -21,5 +21,8 @@ orderRouter
   .patch(ensureRestaurantOwnership, orderController.updateOrder)
   .delete(ensureRestaurantOwnership, orderController.deleteOrder);
 
+// Ruta de prueba para obtener todos los pedidos sin middleware adicional
+orderRouter.get("/test", orderController.testGetAllOrders);
+
 // Export order router
 module.exports = orderRouter;

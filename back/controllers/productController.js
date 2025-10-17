@@ -11,10 +11,12 @@ exports.createProduct = async (req, res, next) => {
   try {
     const { nombre, costo, restaurant } = req.body;
     if (!nombre || costo == null || !restaurant) {
-      return res.status(400).json({
-        status: "fail",
-        message: "Missing required fields: nombre, costo, restaurant",
-      });
+      return res
+        .status(400)
+        .json({
+          status: "fail",
+          message: "Missing required fields: nombre, costo, restaurant",
+        });
     }
     if (typeof costo !== "number" || costo < 0) {
       return res
@@ -25,11 +27,13 @@ exports.createProduct = async (req, res, next) => {
     return res.status(201).json({ status: "success", data: { data: doc } });
   } catch (err) {
     if (err.code === 11000) {
-      return res.status(400).json({
-        status: "fail",
-        message:
-          "Duplicate product for this restaurant (nombre + restaurant must be unique)",
-      });
+      return res
+        .status(400)
+        .json({
+          status: "fail",
+          message:
+            "Duplicate product for this restaurant (nombre + restaurant must be unique)",
+        });
     }
     if (err.name === "ValidationError") {
       return res.status(400).json({ status: "fail", message: err.message });
@@ -111,10 +115,12 @@ exports.deleteProduct = async (req, res, next) => {
     }
     return res.status(204).send();
   } catch (err) {
-    return res.status(500).json({
-      status: "error",
-      message: "Internal error",
-      detail: err.message,
-    });
+    return res
+      .status(500)
+      .json({
+        status: "error",
+        message: "Internal error",
+        detail: err.message,
+      });
   }
 };
