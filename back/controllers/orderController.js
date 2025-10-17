@@ -16,3 +16,22 @@ exports.updateOrder = factory.updateOne(Order);
 
 // Controller to delete an order by ID
 exports.deleteOrder = factory.deleteOne(Order);
+
+// Test controller to fetch and log all orders
+exports.testGetAllOrders = async (req, res) => {
+  try {
+    console.log("Fetching all orders...");
+    const orders = await Order.find();
+    console.log("Orders fetched:", orders);
+    res.status(200).json({
+      status: "success",
+      data: orders,
+    });
+  } catch (err) {
+    console.error("Error fetching orders:", err);
+    res.status(500).json({
+      status: "error",
+      message: "Error fetching orders",
+    });
+  }
+};

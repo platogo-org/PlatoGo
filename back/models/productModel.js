@@ -49,8 +49,8 @@ productSchema.index({ categorias: 1 });
 productSchema.index({ nombre: 1, restaurant: 1 }, { unique: true });
 
 // Only return active products by default
-productSchema.pre(/^find/, function(next) {
-  if (!this.getFilter().hasOwnProperty('active')) {
+productSchema.pre(/^find/, function (next) {
+  if (!this.getFilter().hasOwnProperty("active")) {
     this.where({ active: { $ne: false } });
   }
   next();
