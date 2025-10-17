@@ -1,14 +1,18 @@
-
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import LoginDesign from './LoginDesign';
-import ClientDesign from './ClientDesign';
-import ChefDesign from './ChefDesign';
-import SuperAdminDashboard from './components/SuperAdminDashboard';
-import RestaurantAdminDashboard from './components/RestaurantAdminDashboard';
-import ProtectedRoute from './components/ProtectedRoute';
-import './App.css';
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import LoginDesign from "./LoginDesign";
+import ClientDesign from "./ClientDesign";
+import ChefDesign from "./ChefDesign";
+import SuperAdminDashboard from "./components/SuperAdminDashboard";
+import RestaurantAdminDashboard from "./components/RestaurantAdminDashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
+import "./App.css";
 
 function App() {
   return (
@@ -18,36 +22,36 @@ function App() {
           <Routes>
             {/* Login route */}
             <Route path="/login" element={<LoginDesign />} />
-            
+
             {/* Protected Super Admin Dashboard */}
-            <Route 
-              path="/super-admin/dashboard" 
+            <Route
+              path="/super-admin/dashboard"
               element={
                 <ProtectedRoute requiredRole="super-admin">
                   <SuperAdminDashboard />
                 </ProtectedRoute>
-              } 
+              }
             />
-            
+
             {/* Protected Restaurant Admin Dashboard */}
-            <Route 
-              path="/restaurant/dashboard" 
+            <Route
+              path="/restaurant/dashboard"
               element={
                 <ProtectedRoute requiredRole="restaurant-admin">
                   <RestaurantAdminDashboard />
                 </ProtectedRoute>
-              } 
+              }
             />
 
-            {/* Client Design route */}
+            {/* Client Design route protegida */}
             <Route path="/client" element={<ClientDesign />} />
 
-            { /* ChefDesign route */ }
+            {/* ChefDesign route */}
             <Route path="/chef" element={<ChefDesign />} />
 
             {/* Default redirect to login */}
             <Route path="/" element={<Navigate to="/login" replace />} />
-            
+
             {/* Catch all other routes and redirect to login */}
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>

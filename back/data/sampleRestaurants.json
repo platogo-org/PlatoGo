@@ -1,0 +1,20 @@
+[
+  {
+    "nombre": "Restaurante El Mexicano",
+    "direccion": "Av. Reforma 123, CDMX",
+    "horario": "2025-01-01T08:00:00.000Z",
+    "usuario": null
+  },
+  {
+    "nombre": "La Parrilla Española",
+    "direccion": "Calle Mayor 45, Madrid",
+    "horario": "2025-01-01T09:00:00.000Z",
+    "usuario": null
+  },
+  {
+    "nombre": "Bierhaus Berlín",
+    "direccion": "Alexanderplatz 7, Berlín",
+    "horario": "2025-01-01T10:00:00.000Z",
+    "usuario": null
+  }
+]

@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Admin Mexicano",
+    "email": "adminmex@demo.com",
+    "role": "restaurant-admin",
+    "password": "Demo1234!",
+    "passwordConfirm": "Demo1234!"
+  },
+  {
+    "name": "Admin Español",
+    "email": "adminesp@demo.com",
+    "role": "restaurant-admin",
+    "password": "Demo1234!",
+    "passwordConfirm": "Demo1234!"
+  },
+  {
+    "name": "Admin Alemán",
+    "email": "adminger@demo.com",
+    "role": "restaurant-admin",
+    "password": "Demo1234!",
+    "passwordConfirm": "Demo1234!"
+  }
+]
