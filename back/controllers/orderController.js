@@ -2,7 +2,7 @@
 const Order = require("./../models/orderModel");
 const factory = require("./handlerFactory");
 
-// Controller to create a new order
+// Controller to create a new order -- All Documents will be returned no filter
 exports.createOrder = factory.createOne(Order);
 
 // Controller to get all orders
