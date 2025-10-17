@@ -4,7 +4,8 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
-    "test": "jest --detectOpenHandles"
+    "test": "jest --runInBand",
+    "test:coverage": "jest --runInBand --coverage"
   },
   "author": "platogoteam",
   "license": "ISC",
@@ -35,12 +36,23 @@
   },
   "devDependencies": {
     "jest": "^29.0.0",
-    "mongodb-memory-server": "^8.16.1",
+    "jest-html-reporters": "^3.1.7",
+    "mongodb-memory-server": "^10.2.1",
     "supertest": "^7.1.4"
   },
   "jest": {
     "setupFiles": [
       "<rootDir>/tests/setup.js"
+    ],
+    "reporters": [
+      "default",
+      ["jest-html-reporters", {
+        "publicPath": "<rootDir>/tests/report",
+        "filename": "report.html",
+        "inlineSource": true,
+        "expand": true,
+        "pageTitle": "Product CRUD Tests"
+      }]
     ]
   }
 }

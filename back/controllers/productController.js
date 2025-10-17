@@ -3,7 +3,7 @@ const factory = require("./handlerFactory");
 const AppError = require("../utils/appError");
 const mongoose = require("mongoose");
 
-// List (keep factory)
+// List (keep factory) -- All Documents will be returned no filter
 exports.getAllProducts = factory.getAll(Product);
 
 // Create with explicit validation & duplicate key handling

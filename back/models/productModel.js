@@ -56,6 +56,14 @@ productSchema.pre(/^find/, function (next) {
   next();
 });
 
+// Only return active products by default
+productSchema.pre(/^find/, function(next) {
+  if (!this.getFilter().hasOwnProperty('active')) {
+    this.where({ active: { $ne: false } });
+  }
+  next();
+});
+
 // Middleware to automatically populate references on find queries
 productSchema.pre(/^find/, function (next) {
   this.populate({
