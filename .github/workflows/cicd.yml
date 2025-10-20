@@ -69,9 +69,14 @@ jobs:
           docker push ${{ steps.login-ecr.outputs.registry }}/$TAG-api:latest
           docker push ${{ steps.login-ecr.outputs.registry }}/$TAG-webapp:latest
 
-      - name: Deploy to ECS (only on main, staging, prod)
+      - name: Validar infraestructura con Terraform
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/prod'
         run: |
           cd infra
           terraform init
+          terraform plan -var-file="environments/dev.tfvars"
+      - name: Deploy to ECS (only on main, staging, prod)
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/prod'
+        run: |
+          cd infra
           terraform apply -var-file="environments/dev.tfvars" -auto-approve
