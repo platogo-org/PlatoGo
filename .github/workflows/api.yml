@@ -1,0 +1,42 @@
+name: Build & Push API Docker Image
+
+on:
+  push:
+    branches: [main, staging, prod]
+    paths:
+      - "back/**"
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: ${{ github.ref_name }}-api
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ env.IMAGE_NAME }} ./back
+
+      - name: Tag Docker image
+        run: |
+          TAG=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
+          docker tag ${{ env.IMAGE_NAME }}:latest ${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}:$TAG
+
+      - name: Push Docker image to ECR
+        run: |
+          TAG=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}:$TAG
