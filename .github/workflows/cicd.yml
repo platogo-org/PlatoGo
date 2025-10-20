@@ -75,7 +75,6 @@ jobs:
           cd infra
           terraform init
           terraform plan -var-file="environments/dev.tfvars"
-
       - name: Deploy to ECS (only on main, staging, prod)
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/prod'
         run: |
