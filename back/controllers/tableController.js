@@ -1,3 +1,36 @@
+// Asignar o transferir mesa entre meseros (solo supervisor)
+exports.assignOrTransferTable = catchAsync(async (req, res, next) => {
+  const { waiterId } = req.body;
+  const table = await Table.findById(req.params.id);
+  if (!table) return next(new AppError("Mesa no encontrada", 404));
+  // Solo supervisor puede asignar/transferir
+  if (!req.user || req.user.role !== "restaurant-admin") {
+    return next(
+      new AppError("Solo el supervisor puede asignar o transferir mesas", 403)
+    );
+  }
+  const fromWaiter = table.assignedWaiter;
+  table.assignedWaiter = waiterId;
+  table.transferHistory.push({
+    from: fromWaiter,
+    to: waiterId,
+    supervisor: req.user._id,
+    timestamp: new Date(),
+  });
+  await table.save();
+  // Emitir evento WebSocket de transferencia
+  io.emit("mesaTransferida", {
+    mesaId: table._id,
+    from: fromWaiter,
+    to: waiterId,
+    supervisor: req.user._id,
+    timestamp: new Date(),
+  });
+  res.status(200).json({
+    status: "success",
+    data: { table },
+  });
+});
 // Cambiar estado de la mesa solo por el mesero asignado
 const { io } = require("../server");
 exports.changeTableState = catchAsync(async (req, res, next) => {
