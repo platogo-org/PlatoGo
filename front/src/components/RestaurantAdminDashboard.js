@@ -1,9 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
-import axios from "axios";
-import { io } from "socket.io-client";
-
-const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || "http://localhost:3000";
+import React, { useMemo, useCallback } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import CategoryManager from './CategoryManager';
 
 const RestaurantAdminDashboard = () => {
   const { user, logout } = useAuth();
@@ -64,43 +61,7 @@ const RestaurantAdminDashboard = () => {
           {token}
         </pre>
       </div>
-      <div style={{ marginTop: 24 }}>
-        <h3>Asignar/Transferir Mesa</h3>
-        <div>
-          <label>Mesa: </label>
-          <select
-            value={selectedTable}
-            onChange={(e) => setSelectedTable(e.target.value)}
-          >
-            <option value="">Selecciona una mesa</option>
-            {tables.map((t) => (
-              <option key={t._id} value={t._id}>
-                {t.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label>Mesero: </label>
-          <select
-            value={selectedWaiter}
-            onChange={(e) => setSelectedWaiter(e.target.value)}
-          >
-            <option value="">Selecciona un mesero</option>
-            {waiters.map((w) => (
-              <option key={w._id} value={w._id}>
-                {w.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <button onClick={handleAssign} style={{ marginTop: 8 }}>
-          Asignar/Transferir
-        </button>
-        {message && (
-          <div style={{ color: "green", marginTop: 8 }}>{message}</div>
-        )}
-      </div>
+      <CategoryManager onChange={useCallback(() => {}, [])} />
     </div>
   );
 };
