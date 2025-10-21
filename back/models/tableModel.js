@@ -22,6 +22,17 @@ const tableSchema = new mongoose.Schema({
     ref: "Restaurant",
     required: [true, "La mesa debe estar asociada a un restaurante"],
   },
+  estado: {
+    type: String,
+    enum: ["libre", "ocupada", "cuenta"],
+    default: "libre",
+    required: true,
+  },
+  assignedWaiter: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
 });
 
 module.exports = mongoose.model("Table", tableSchema);

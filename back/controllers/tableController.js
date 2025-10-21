@@ -1,3 +1,34 @@
+// Cambiar estado de la mesa solo por el mesero asignado
+const { io } = require("../server");
+exports.changeTableState = catchAsync(async (req, res, next) => {
+  const { estado } = req.body;
+  const table = await Table.findById(req.params.id);
+  if (!table) return next(new AppError("Mesa no encontrada", 404));
+  // Verificar que el usuario es el mesero asignado
+  if (
+    !req.user ||
+    req.user.role !== "restaurant-waiter" ||
+    String(table.assignedWaiter) !== String(req.user._id)
+  ) {
+    return next(
+      new AppError(
+        "Solo el mesero asignado puede cambiar el estado de la mesa",
+        403
+      )
+    );
+  }
+  if (!["libre", "ocupada", "cuenta"].includes(estado)) {
+    return next(new AppError("Estado inválido", 400));
+  }
+  table.estado = estado;
+  await table.save();
+  // Emitir evento WebSocket a todos los clientes
+  io.emit("mesaEstadoActualizado", { mesaId: table._id, estado });
+  res.status(200).json({
+    status: "success",
+    data: { table },
+  });
+});
 const Table = require("../models/tableModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
