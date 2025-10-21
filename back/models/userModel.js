@@ -10,6 +10,7 @@ const bcrypt = require("bcryptjs");
 const ROLES = {
   SUPER_ADMIN: "super-admin",
   RESTAURANT_ADMIN: "restaurant-admin",
+  RESTAURANT_WAITER: "restaurant-waiter",
   USER: "user",
 };
 
@@ -29,7 +30,7 @@ const userShcema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["super-admin", "restaurant-admin"], // Allowed roles
+    enum: ["super-admin", "restaurant-admin", "restaurant-waiter", "user"], // Allowed roles
     default: "restaurant-admin",
   },
   password: {

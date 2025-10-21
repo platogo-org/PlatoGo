@@ -13,4 +13,7 @@ router
   .put(tableController.updateTable)
   .delete(tableController.deleteTable);
 
+// Ruta para cambiar el estado de la mesa
+router.patch("/:id/state", tableController.changeTableState);
+
 module.exports = router;
