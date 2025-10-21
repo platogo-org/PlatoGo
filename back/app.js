@@ -21,6 +21,7 @@ const productRouter = require("./routes/productRoutes");
 const restaurantRouter = require("./routes/restaurantRoutes");
 const tableRouter = require("./routes/tableRoutes");
 const viewRouter = require("./routes/viewRoutes");
+const modifierRouter = require("./routes/modifierRoutes");
 
 // Initialize express app
 const app = express();
@@ -138,6 +139,7 @@ app.use("/api/v1/order", orderRouter);
 app.use("/api/v1/product", productRouter);
 app.use("/api/v1/restaurant", restaurantRouter);
 app.use("/api/v1/table", tableRouter);
+app.use("/api/v1/modifiers", modifierRouter);
 
 // View engine and static files
 app.set("view engine", "pug");
