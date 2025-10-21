@@ -53,6 +53,10 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: true, // Product is active by default
     },
+    disponible: {
+      type: Boolean,
+      default: true, // Producto disponible por defecto
+    },
   },
   {
     timestamps: true, // Add createdAt and updatedAt fields
