@@ -33,6 +33,14 @@ const tableSchema = new mongoose.Schema({
     ref: "User",
     default: null,
   },
+  transferHistory: [
+    {
+      from: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      to: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      timestamp: { type: Date, default: Date.now },
+      supervisor: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    },
+  ],
 });
 
 module.exports = mongoose.model("Table", tableSchema);

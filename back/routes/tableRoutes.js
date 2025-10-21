@@ -16,4 +16,7 @@ router
 // Ruta para cambiar el estado de la mesa
 router.patch("/:id/state", tableController.changeTableState);
 
+// Ruta para asignar/transferir mesa entre meseros (solo supervisor)
+router.patch("/:id/assign", tableController.assignOrTransferTable);
+
 module.exports = router;
