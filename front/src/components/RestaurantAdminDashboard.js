@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import CategoryManager from './CategoryManager';
 
 const RestaurantAdminDashboard = () => {
   const { user, logout } = useAuth();
@@ -21,6 +22,7 @@ const RestaurantAdminDashboard = () => {
 {token}
         </pre>
       </div>
+      <CategoryManager onChange={useCallback(() => {}, [])} />
     </div>
   );
 };

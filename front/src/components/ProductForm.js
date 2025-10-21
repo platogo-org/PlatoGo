@@ -8,16 +8,36 @@ const ProductForm = ({ product = null, onSaved, onCancel }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [availableCategories, setAvailableCategories] = useState([]);
+  const [selectedCategorias, setSelectedCategorias] = useState([]);
 
   useEffect(() => {
     if (product) {
       setNombre(product.nombre || '');
       setCosto(product.costo ?? '');
       setRestaurant(product.restaurant || '');
+      const cats = (product.categorias || []).map((c) => (typeof c === 'string' ? c : c._id));
+      setSelectedCategorias(cats);
     } else {
-      setNombre(''); setCosto(''); setRestaurant('');
+      setNombre(''); setCosto(''); setRestaurant(''); setSelectedCategorias([]);
     }
   }, [product]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const res = await axios.get('/category');
+        // API factory returns data.data.data but some endpoints may vary
+        const list = res.data?.data?.data || res.data?.data || [];
+        if (!cancelled) setAvailableCategories(list);
+      } catch (err) {
+        // ignore silently
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, []);
 
   const validate = () => {
     if (!nombre) return 'El nombre es obligatorio';
@@ -33,11 +53,12 @@ const ProductForm = ({ product = null, onSaved, onCancel }) => {
     setLoading(true);
     setError(null);
     try {
+      const payload = { nombre, costo: Number(costo), restaurant, categorias: selectedCategorias };
       if (product && product._id) {
-        await axios.patch(`/product/${product._id}`, { nombre, costo: Number(costo), restaurant });
+        await axios.patch(`/product/${product._id}`, payload);
         setSuccess('Producto actualizado');
       } else {
-        await axios.post('/product', { nombre, costo: Number(costo), restaurant });
+        await axios.post('/product', payload);
         setSuccess('Producto creado');
       }
       onSaved && onSaved();
@@ -61,6 +82,18 @@ const ProductForm = ({ product = null, onSaved, onCancel }) => {
       <div>
         <label htmlFor="restaurant-input">Restaurant</label>
         <input id="restaurant-input" value={restaurant} onChange={(e) => setRestaurant(e.target.value)} />
+      </div>
+      <div>
+        <label htmlFor="categorias-input">Categorias</label>
+        <select id="categorias-input" multiple value={selectedCategorias} onChange={(e) => {
+          const opts = Array.from(e.target.selectedOptions).map(o => o.value);
+          setSelectedCategorias(opts);
+        }} style={{ minWidth: 200, minHeight: 80 }}>
+          {availableCategories.map((cat) => (
+            <option key={cat._id || cat.id} value={cat._id || cat.id}>{cat.nombre}</option>
+          ))}
+        </select>
+        <div style={{ fontSize: 12, color: '#666', marginTop: 6 }}>Mantenga pulsada la tecla Ctrl/Cmd para seleccionar varias.</div>
       </div>
       <div style={{ marginTop: 8 }}>
         <button type="submit" disabled={loading}>{loading ? 'Guardando...' : 'Guardar'}</button>
