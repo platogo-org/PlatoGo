@@ -116,3 +116,47 @@ exports.editItemInOrder = async (req, res, next) => {
     next(err);
   }
 };
+
+// Calculate total, taxes, and tip for an order
+exports.calculateOrderTotals = async (req, res, next) => {
+  try {
+    const { orderId, tip } = req.body;
+
+    // Find the order
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Order not found",
+      });
+    }
+
+    // Calculate subtotal
+    const subtotal = order.productos.reduce(
+      (sum, item) => sum + item.quantity * item.price,
+      0
+    );
+
+    // Calculate tax (e.g., 10% of subtotal)
+    const tax = subtotal * 0.1;
+
+    // Update tip if provided
+    if (tip !== undefined) {
+      order.tip = tip;
+    }
+
+    // Update order fields
+    order.subtotal = subtotal;
+    order.tax = tax;
+
+    // Save the updated order
+    await order.save();
+
+    res.status(200).json({
+      status: "success",
+      data: order,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
