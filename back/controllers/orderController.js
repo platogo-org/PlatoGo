@@ -1,6 +1,7 @@
 // Import Order model and generic handler factory
 const Order = require("./../models/orderModel");
 const factory = require("./handlerFactory");
+const { io } = require("../server");
 
 // Controller to create a new order -- All Documents will be returned no filter
 exports.createOrder = factory.createOne(Order);
@@ -154,6 +155,45 @@ exports.calculateOrderTotals = async (req, res, next) => {
 
     res.status(200).json({
       status: "success",
+      data: order,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Send order to kitchen
+exports.sendOrderToKitchen = async (req, res, next) => {
+  try {
+    const { orderId } = req.body;
+
+    // Find the order
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Order not found",
+      });
+    }
+
+    // Check if the order is already sent to the kitchen
+    if (order.estado !== "pending") {
+      return res.status(400).json({
+        status: "fail",
+        message: "Order is already in preparation or completed",
+      });
+    }
+
+    // Update order status to 'preparing'
+    order.estado = "preparing";
+    await order.save();
+
+    // Emit event to kitchen module
+    io.emit("orderToKitchen", order);
+
+    res.status(200).json({
+      status: "success",
+      message: "Order sent to kitchen",
       data: order,
     });
   } catch (err) {
