@@ -1,6 +1,10 @@
-import React, { useMemo, useCallback } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import CategoryManager from './CategoryManager';
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import axios from "axios";
+import { io } from "socket.io-client";
+import { useAuth } from "../contexts/AuthContext";
+import CategoryManager from "./CategoryManager";
+
+const SOCKET_URL = "http://localhost:3000"; // Define SOCKET_URL
 
 const RestaurantAdminDashboard = () => {
   const { user, logout } = useAuth();

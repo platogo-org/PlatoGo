@@ -1,7 +1,6 @@
-const express = require('express');
-const modifierController = require('../controllers/modifierController');
-const authController = require('../controllers/authController');
-const { restrictTo } = require('../utils/authorization');
+const express = require("express");
+const modifierController = require("../controllers/modifierController");
+const authController = require("../controllers/authController");
 
 const router = express.Router({ mergeParams: true });
 
@@ -9,28 +8,28 @@ const router = express.Router({ mergeParams: true });
 router.use(authController.protect);
 
 // Routes restricted to restaurant admin and super admin
-router.use(restrictTo('restaurant-admin', 'super-admin'));
+router.use(authController.restrictTo("restaurant-admin", "super-admin"));
 
 router
-  .route('/')
+  .route("/")
   .get(modifierController.getAllModifiers)
   .post(modifierController.createModifier);
 
 router
-  .route('/:id')
+  .route("/:id")
   .get(modifierController.getModifier)
   .patch(modifierController.updateModifier)
   .delete(modifierController.deleteModifier);
 
 // Get modifiers by restaurant
 router.get(
-  '/restaurant/:restaurantId',
+  "/restaurant/:restaurantId",
   modifierController.getRestaurantModifiers
 );
 
 // Get modifiers by type for a restaurant
 router.get(
-  '/restaurant/:restaurantId/type/:type',
+  "/restaurant/:restaurantId/type/:type",
   modifierController.getModifiersByType
 );
 

@@ -1,3 +1,7 @@
+const Table = require("../models/tableModel");
+const catchAsync = require("../utils/catchAsync");
+const AppError = require("../utils/appError");
+
 // Asignar o transferir mesa entre meseros (solo supervisor)
 exports.assignOrTransferTable = catchAsync(async (req, res, next) => {
   const { waiterId } = req.body;
@@ -62,9 +66,6 @@ exports.changeTableState = catchAsync(async (req, res, next) => {
     data: { table },
   });
 });
-const Table = require("../models/tableModel");
-const catchAsync = require("../utils/catchAsync");
-const AppError = require("../utils/appError");
 
 exports.getAllTables = catchAsync(async (req, res, next) => {
   const tables = await Table.find().populate("restaurant");
