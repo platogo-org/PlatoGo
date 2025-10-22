@@ -45,14 +45,20 @@ const orderSchema = new mongoose.Schema(
       ref: "User",
       required: [true, "An order must have a customer"], // Reference to User
     },
-    total: {
+    subtotal: {
       type: Number,
       required: true,
-      min: 0, // Total price
+      min: 0, // Subtotal before taxes and tips
     },
-    notas: {
-      type: String,
-      trim: true, // Optional notes
+    tax: {
+      type: Number,
+      required: true,
+      min: 0, // Tax amount
+    },
+    tip: {
+      type: Number,
+      default: 0, // Tip amount, editable before order closure
+      min: 0,
     },
   },
   {
@@ -61,6 +67,11 @@ const orderSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
+// Virtual field to calculate total dynamically
+orderSchema.virtual("total").get(function () {
+  return this.subtotal + this.tax + this.tip;
+});
 
 // Indexes for efficient queries
 orderSchema.index({ restaurant: 1, estado: 1 });
