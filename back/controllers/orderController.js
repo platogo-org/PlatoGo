@@ -35,3 +35,84 @@ exports.testGetAllOrders = async (req, res) => {
     });
   }
 };
+
+// Add an item to an order
+exports.addItemToOrder = async (req, res, next) => {
+  try {
+    const { orderId, productId, quantity, price } = req.body;
+
+    // Find the order
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Order not found",
+      });
+    }
+
+    // Check if the product already exists in the order
+    const existingItem = order.productos.find(
+      (item) => item.product.toString() === productId
+    );
+
+    if (existingItem) {
+      // Update quantity if the product already exists
+      existingItem.quantity += quantity;
+    } else {
+      // Add new product to the order
+      order.productos.push({ product: productId, quantity, price });
+    }
+
+    // Save the updated order
+    await order.save();
+
+    res.status(200).json({
+      status: "success",
+      data: order,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Edit an item in an order
+exports.editItemInOrder = async (req, res, next) => {
+  try {
+    const { orderId, productId, quantity, notes } = req.body;
+
+    // Find the order
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Order not found",
+      });
+    }
+
+    // Find the product in the order
+    const item = order.productos.find(
+      (item) => item.product.toString() === productId
+    );
+
+    if (!item) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Product not found in order",
+      });
+    }
+
+    // Update item details
+    if (quantity !== undefined) item.quantity = quantity;
+    if (notes !== undefined) item.notes = notes;
+
+    // Save the updated order
+    await order.save();
+
+    res.status(200).json({
+      status: "success",
+      data: order,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
