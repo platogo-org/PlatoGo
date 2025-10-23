@@ -65,6 +65,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     passwordChangedAt: req.body.passwordChangedAt,
     role: req.body.role,
   });
+
   const url = `${req.protocol}://${req.get("host")}/me`;
   await new Email(newUser, url).sendWelcome();
   createSendToken(newUser, 201, req, res);
@@ -86,6 +87,16 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError("Incorrect Email or Password", 401));
   }
   // 3) If everything ok, send token to client
+  let redirectUrl = "/";
+  if (user.role === "restaurant-waiter") {
+    redirectUrl = "/waiter/dashboard";
+  } else if (user.role === "restaurant-admin") {
+    redirectUrl = "/admin/dashboard";
+  } else if (user.role === "super-admin") {
+    redirectUrl = "/super-admin/dashboard";
+  }
+
+  // Use createSendToken to send response, including role and redirectUrl
   createSendToken(user, 200, req, res);
 });
 

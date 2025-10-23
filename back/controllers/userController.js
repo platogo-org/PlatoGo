@@ -124,3 +124,56 @@ exports.deleteUser = factory.deleteOne(User);
 //     messaje: 'This route is not yet defined',
 //   });
 // };
+
+// Start a shift
+exports.startShift = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+
+  if (!user) {
+    return next(new AppError("User not found", 404));
+  }
+
+  if (user.role !== "restaurant-waiter") {
+    return next(new AppError("Only waiters can start a shift", 403));
+  }
+
+  if (user.shiftStart) {
+    return next(new AppError("Shift already started", 400));
+  }
+
+  user.shiftStart = new Date();
+  user.shiftEnd = null; // Ensure shiftEnd is reset
+  await user.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Shift started",
+    data: user,
+  });
+});
+
+// End a shift
+exports.endShift = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+
+  if (!user) {
+    return next(new AppError("User not found", 404));
+  }
+
+  if (user.role !== "restaurant-waiter") {
+    return next(new AppError("Only waiters can end a shift", 403));
+  }
+
+  if (!user.shiftStart) {
+    return next(new AppError("No active shift to end", 400));
+  }
+
+  user.shiftEnd = new Date();
+  await user.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Shift ended",
+    data: user,
+  });
+});
