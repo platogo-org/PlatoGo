@@ -13,6 +13,11 @@ import SuperAdminDashboard from "./components/SuperAdminDashboard";
 import RestaurantAdminDashboard from "./components/RestaurantAdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./App.css";
+import WaiterDashboard from "./pages/WaiterDashboard";
+import ShiftManagement from "./pages/ShiftManagement";
+import OrderManagement from "./pages/OrderManagement";
+import OrderTotals from "./pages/OrderTotals";
+import SendToKitchen from "./pages/SendToKitchen";
 
 function App() {
   return (
@@ -39,6 +44,84 @@ function App() {
               element={
                 <ProtectedRoute requiredRole="restaurant-admin">
                   <RestaurantAdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Protected Waiter Dashboard */}
+            <Route
+              path="/waiter/dashboard"
+              element={
+                <ProtectedRoute requiredRole="restaurant-waiter">
+                  <WaiterDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Protected Waiter Actions */}
+            <Route
+              path="/shift-management"
+              element={
+                <ProtectedRoute requiredRole="restaurant-waiter">
+                  <ShiftManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/order-management"
+              element={
+                <ProtectedRoute requiredRole="restaurant-waiter">
+                  <OrderManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/order-totals"
+              element={
+                <ProtectedRoute requiredRole="restaurant-waiter">
+                  <OrderTotals />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/send-to-kitchen"
+              element={
+                <ProtectedRoute requiredRole="restaurant-waiter">
+                  <SendToKitchen />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Protected Waiter Actions */}
+            <Route
+              path="/shift-management"
+              element={
+                <ProtectedRoute requiredRole="restaurant-waiter">
+                  <ShiftManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/order-management"
+              element={
+                <ProtectedRoute requiredRole="restaurant-waiter">
+                  <OrderManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/order-totals"
+              element={
+                <ProtectedRoute requiredRole="restaurant-waiter">
+                  <OrderTotals />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/send-to-kitchen"
+              element={
+                <ProtectedRoute requiredRole="restaurant-waiter">
+                  <SendToKitchen />
                 </ProtectedRoute>
               }
             />
