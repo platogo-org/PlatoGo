@@ -143,6 +143,7 @@ exports.startShift = catchAsync(async (req, res, next) => {
 
   user.shiftStart = new Date();
   user.shiftEnd = null; // Ensure shiftEnd is reset
+  user.passwordConfirm = undefined;
   await user.save();
 
   res.status(200).json({
@@ -168,7 +169,24 @@ exports.endShift = catchAsync(async (req, res, next) => {
     return next(new AppError("No active shift to end", 400));
   }
 
-  user.shiftEnd = new Date();
+  const shiftEnd = new Date();
+  user.shiftEnd = shiftEnd;
+
+  // Calculate duration in minutes
+  const duration = Math.round((shiftEnd - user.shiftStart) / 60000);
+
+  // Add shift info to shifts array
+  user.shifts.push({
+    date: user.shiftStart,
+    start: user.shiftStart,
+    end: shiftEnd,
+    duration,
+  });
+
+  // Reset shiftStart and shiftEnd
+  user.shiftStart = null;
+  user.shiftEnd = null;
+  user.passwordConfirm = undefined;
   await user.save();
 
   res.status(200).json({

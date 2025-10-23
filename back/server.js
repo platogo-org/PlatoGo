@@ -32,26 +32,8 @@ const server = app.listen(port, () => {
 });
 
 // Integrar socket.io
-const { Server } = require("socket.io");
-const io = new Server(server, {
-  cors: {
-    origin: [
-      "http://localhost:4000",
-      "http://localhost",
-      "http://localhost:3000",
-      "http://localhost:3001",
-      "http://127.0.0.1:3001",
-    ],
-    credentials: true,
-  },
-});
-
-io.on("connection", (socket) => {
-  console.log("Nuevo cliente conectado a WebSocket");
-});
-
-// Exportar io para usar en controladores
-module.exports.io = io;
+const socketIO = require("./socket");
+socketIO.init(server);
 
 // Handle unhandled promise rejections
 process.on("unhandledRejection", (err) => {

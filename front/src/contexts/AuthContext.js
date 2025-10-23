@@ -34,8 +34,11 @@ export const AuthProvider = ({ children }) => {
           setUser(response.data.data.user);
         }
       } catch (error) {
-        // Token is invalid or expired
-        logout();
+        // Solo cerrar sesión si el error es 401 (token inválido o expirado)
+        if (error.response?.status === 401) {
+          logout();
+        }
+        // Si es otro error, no cerrar sesión automáticamente
       } finally {
         setLoading(false);
       }

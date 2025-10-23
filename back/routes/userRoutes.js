@@ -17,6 +17,11 @@ usersRouter.patch("/resetPassword/:token", authController.resetPassword);
 usersRouter.use(authController.protect);
 
 // Authenticated user routes
+
+// Shift management routes (waiter actions)
+usersRouter.post("/start-shift", userController.startShift);
+usersRouter.post("/end-shift", userController.endShift);
+
 usersRouter.patch("/updateMyPassword", authController.updatePassword);
 usersRouter.get("/me", userController.getMe, userController.getUser);
 usersRouter.patch(

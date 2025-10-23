@@ -7,7 +7,7 @@ const SendToKitchen = () => {
 
   const sendOrder = async () => {
     try {
-      const response = await axios.post("/api/v1/orders/send-to-kitchen", {
+      const response = await axios.post("order/send-to-kitchen", {
         orderId,
       });
       setMessage(response.data.message);
