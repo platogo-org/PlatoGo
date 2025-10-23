@@ -10,16 +10,25 @@ const OrderTotals = () => {
   const calculateTotals = async () => {
     console.log("ad");
     try {
-      const response = await axios.post("/order/calculate-totals", {
-        orderId,
-        tip,
-      });
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        "/order/calculate-totals",
+        {
+          orderId,
+          tip,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       console.log(response);
       setMessage(
         response.data.message || "Totals calculated and order updated"
       );
       // Obtener la orden actualizada
-      const orderRes = await axios.get(`/order/${orderId}`);
+      const orderRes = await axios.get(`/order/${orderId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setOrder(orderRes.data.data.data);
     } catch (error) {
       setMessage(error.response?.data?.message || "Error calculating totals");

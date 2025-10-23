@@ -7,9 +7,16 @@ const SendToKitchen = () => {
 
   const sendOrder = async () => {
     try {
-      const response = await axios.post("order/send-to-kitchen", {
-        orderId,
-      });
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        "/order/send-to-kitchen",
+        {
+          orderId,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setMessage(response.data.message);
     } catch (error) {
       setMessage(

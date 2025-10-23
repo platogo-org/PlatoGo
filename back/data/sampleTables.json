@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Mesa 1",
+    "capacity": 4,
+    "location": "Zona Principal",
+    "estado": "libre"
+  },
+  {
+    "name": "Mesa 2",
+    "capacity": 2,
+    "location": "Zona Principal",
+    "estado": "libre"
+  },
+  {
+    "name": "Mesa 3",
+    "capacity": 6,
+    "location": "Zona Ventana",
+    "estado": "libre"
+  },
+  {
+    "name": "Mesa 4",
+    "capacity": 4,
+    "location": "Zona Ventana",
+    "estado": "libre"
+  },
+  {
+    "name": "Mesa 5",
+    "capacity": 8,
+    "location": "Zona Terraza",
+    "estado": "libre"
+  },
+  {
+    "name": "Mesa 6",
+    "capacity": 2,
+    "location": "Zona Bar",
+    "estado": "libre"
+  },
+  {
+    "name": "Mesa 7",
+    "capacity": 4,
+    "location": "Zona Bar",
+    "estado": "libre"
+  },
+  {
+    "name": "Mesa 8",
+    "capacity": 6,
+    "location": "Zona Terraza",
+    "estado": "libre"
+  },
+  {
+    "name": "Mesa 9",
+    "capacity": 4,
+    "location": "Zona Principal",
+    "estado": "libre"
+  },
+  {
+    "name": "Mesa 10",
+    "capacity": 2,
+    "location": "Zona Ventana",
+    "estado": "libre"
+  }
+]

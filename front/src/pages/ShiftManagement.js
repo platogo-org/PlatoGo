@@ -12,7 +12,10 @@ const ShiftManagement = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get("/users/me");
+        const token = localStorage.getItem("token");
+        const response = await axios.get("/users/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         // Ajusta la destructuración según la respuesta real
         const userData =
           response.data.data.data || response.data.data.user || {};
@@ -20,6 +23,7 @@ const ShiftManagement = () => {
         setShiftActive(!!userData.shiftStart);
         if (setUser) setUser(userData);
       } catch (error) {
+        console.error("Error fetching user info:", error);
         setMessage("Error fetching user info");
       }
     };
@@ -29,7 +33,14 @@ const ShiftManagement = () => {
   const startShift = async () => {
     console.log("Start shift clicked");
     try {
-      const response = await axios.post("/users/start-shift");
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        "/users/start-shift",
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       console.log("Shift response:", response);
       setMessage(response.data.message);
       setShiftActive(true);
@@ -42,12 +53,21 @@ const ShiftManagement = () => {
   const endShift = async () => {
     console.log("End shift clicked");
     try {
-      const response = await axios.post("/users/end-shift");
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        "/users/end-shift",
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       console.log("End shift response:", response);
       setMessage(response.data.message);
       setShiftActive(false);
       // Refetch shifts after ending shift
-      const userRes = await axios.get("/users/me");
+      const userRes = await axios.get("/users/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const userData = userRes.data.data.data || userRes.data.data.user || {};
       setShifts(userData.shifts || []);
       if (setUser) setUser(userData);

@@ -210,6 +210,23 @@ exports.ensureSuperAdmin = (req, res, next) => {
   next();
 };
 
+// Ensure the authenticated user is a Restaurant Admin
+exports.ensureRestaurantAdmin = (req, res, next) => {
+  if (!req.user) {
+    return next(
+      new AppError("You are not logged in! Please log in to get access", 401)
+    );
+  }
+
+  if (req.user.role !== "restaurant-admin") {
+    return next(
+      new AppError("Only Restaurant Admins can perform this action", 403)
+    );
+  }
+
+  next();
+};
+
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on POSTED email
   const user = await User.findOne({ email: req.body.email });

@@ -11,7 +11,10 @@ export default function AddItems({ orderId, onProductAdded }) {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get("/product");
+        const token = localStorage.getItem("token");
+        const res = await axios.get("/product", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         console.log(res);
         const arr = Array.isArray(res.data.data)
           ? res.data.data
@@ -46,13 +49,20 @@ export default function AddItems({ orderId, onProductAdded }) {
       return;
     }
     try {
+      const token = localStorage.getItem("token");
       await Promise.all(
         selectedProducts.map((productId) =>
-          axios.post("/order/add-item", {
-            orderId,
-            productId,
-            quantity,
-          })
+          axios.post(
+            "/order/add-item",
+            {
+              orderId,
+              productId,
+              quantity,
+            },
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          )
         )
       );
       setMessage("Items added successfully");

@@ -11,7 +11,14 @@ export default function CreateOrder({ onOrderCreated }) {
       return;
     }
     try {
-      const res = await axios.post("/order", { restaurant: restaurantId });
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        "/order",
+        { restaurant: restaurantId },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       console.log(res);
       onOrderCreated(res.data.data.data._id);
       setMessage("");

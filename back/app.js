@@ -73,15 +73,7 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-// Limit requests from same API (rate limiting)
-const limiter = rateLimit({
-  max: 100,
-  windowMs: 60 * 60 * 1000,
-  message: "Too many requests from this IP, please try again in an hour!",
-});
-app.use("/api", limiter);
-
-// Enable CORS for frontend
+// Enable CORS for frontend (DEBE IR ANTES del rate limiter y body parser)
 app.use(
   cors({
     origin: "http://localhost:3000",
@@ -94,6 +86,14 @@ app.use(
 
 // Responder a preflight OPTIONS para todas las rutas
 app.options("*", cors());
+
+// Limit requests from same API (rate limiting)
+const limiter = rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 1000,
+  message: "Too many requests from this IP, please try again in an hour!",
+});
+app.use("/api", limiter);
 
 // Body parser, reading data from body into req.body
 app.use(express.json({ limit: "10kb" }));
