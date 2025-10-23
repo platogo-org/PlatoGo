@@ -239,11 +239,30 @@ exports.sendOrderToKitchen = async (req, res, next) => {
     await order.save();
     console.log("Orden guardada, emitiendo evento...");
 
-    // Emitir evento DESPUÉS de guardar exitosamente
-    const io = socketIO.getIO();
+    // Emitir evento DESPUÉS de guardar exitosamente usando canales específicos
     const orderObj = order.toObject();
     console.log("Emitiendo 'orderToKitchen' con:", orderObj._id);
+    console.log("Restaurant de la orden:", order.restaurant);
+
+    // Obtener instancia de io
+    const io = socketIO.getIO();
+
+    // Emitir a la cocina del restaurante específico
+    if (order.restaurant) {
+      console.log(`📡 Emitiendo a canal kitchen_${order.restaurant}`);
+      socketIO.emitToKitchen(order.restaurant, "orderToKitchen", orderObj);
+      // También notificar al restaurante general
+      socketIO.emitToRestaurant(
+        order.restaurant,
+        "orderStatusChanged",
+        orderObj
+      );
+    }
+
+    // SIEMPRE emitir globalmente como fallback
+    console.log("📡 Emitiendo globalmente 'orderToKitchen'");
     io.emit("orderToKitchen", orderObj);
+
     console.log("✅ Evento 'orderToKitchen' emitido");
 
     res.status(200).json({
@@ -252,6 +271,105 @@ exports.sendOrderToKitchen = async (req, res, next) => {
       data: order,
     });
   } catch (err) {
+    next(err);
+  }
+};
+
+// Update order status from kitchen
+exports.updateOrderStatus = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const { estado } = req.body;
+
+    // Validar estados permitidos (deben coincidir con el modelo)
+    const validStatuses = [
+      "pending",
+      "confirmed",
+      "preparing",
+      "ready",
+      "delivered",
+      "cancelled",
+    ];
+    if (!validStatuses.includes(estado)) {
+      return res.status(400).json({
+        status: "fail",
+        message: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
+      });
+    }
+
+    const order = await Order.findById(orderId).populate({
+      path: "productos.product",
+      select: "nombre costo",
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Order not found",
+      });
+    }
+
+    console.log(`🔄 Actualizando orden ${orderId}`);
+    console.log(`   Estado anterior: ${order.estado}`);
+    console.log(`   Estado nuevo: ${estado}`);
+
+    // Actualizar estado
+    order.estado = estado;
+
+    // Validar que el estado realmente se estableció
+    if (order.estado !== estado) {
+      console.error(`❌ ERROR: El estado no se estableció correctamente!`);
+      console.error(`   Esperado: ${estado}`);
+      console.error(`   Actual: ${order.estado}`);
+      return res.status(500).json({
+        status: "error",
+        message: "Failed to set order status",
+      });
+    }
+
+    console.log(`💾 Guardando en BD...`);
+    const savedOrder = await order.save();
+
+    console.log(`✅ Orden guardada en BD con estado: ${savedOrder.estado}`);
+    console.log(`📡 Restaurant de la orden: ${order.restaurant}`);
+
+    const orderObj = order.toObject();
+
+    // Obtener instancia de io
+    const io = socketIO.getIO();
+
+    // Emitir evento de actualización a todos los interesados
+    if (order.restaurant) {
+      // Notificar a la cocina
+      console.log(
+        `📡 Emitiendo orderStatusUpdated a kitchen_${order.restaurant}`
+      );
+      socketIO.emitToKitchen(order.restaurant, "orderStatusUpdated", orderObj);
+      // Notificar al restaurante general (meseros, admin)
+      socketIO.emitToRestaurant(
+        order.restaurant,
+        "orderStatusChanged",
+        orderObj
+      );
+      // Si hay un mesero asignado, notificarle directamente
+      if (order.waiter) {
+        socketIO.emitToWaiter(order.waiter, "orderStatusChanged", orderObj);
+      }
+    }
+
+    // SIEMPRE emitir globalmente como fallback
+    console.log("📡 Emitiendo orderStatusUpdated globalmente");
+    io.emit("orderStatusUpdated", orderObj);
+    console.log("✅ Eventos emitidos correctamente");
+
+    res.status(200).json({
+      status: "success",
+      message: "Order status updated",
+      data: order,
+    });
+  } catch (err) {
+    console.error("❌ ERROR al actualizar orden:", err);
+    console.error("❌ Stack trace:", err.stack);
     next(err);
   }
 };

@@ -28,6 +28,9 @@ orderRouter.post("/add-item", orderController.addItemToOrder);
 orderRouter.post("/calculate-totals", orderController.calculateOrderTotals);
 orderRouter.post("/send-to-kitchen", orderController.sendOrderToKitchen);
 
+// Endpoint para actualizar el estado de una orden (usado por cocina)
+orderRouter.patch("/:orderId/status", orderController.updateOrderStatus);
+
 orderRouter.get("/test", orderController.testGetAllOrders);
 
 // Export order router
