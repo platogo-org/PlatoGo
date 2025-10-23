@@ -63,6 +63,14 @@ const userShcema = new mongoose.Schema({
     ref: "Restaurant", // Reference to Restaurant
     default: null,
   },
+  shiftStart: {
+    type: Date,
+    default: null, // Null when no shift is active
+  },
+  shiftEnd: {
+    type: Date,
+    default: null, // Null when the shift is ongoing
+  },
 });
 
 // Hash password before saving if it was modified
