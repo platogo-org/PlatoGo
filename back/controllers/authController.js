@@ -121,6 +121,8 @@ exports.protect = catchAsync(async (req, res, next) => {
   } else if (req.cookies.jwt) {
     token = req.cookies.jwt;
   }
+  console.log("[PROTECT] Token recibido:", token);
+  console.log("[PROTECT] Headers:", req.headers);
 
   if (!token) {
     return next(

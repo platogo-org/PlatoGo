@@ -4,6 +4,11 @@ const mongoose = require("mongoose");
 // Define Order schema
 const orderSchema = new mongoose.Schema(
   {
+    // orderId personalizado ya no es requerido ni único
+    orderId: {
+      type: String,
+      trim: true,
+    },
     productos: [
       {
         product: {
@@ -40,20 +45,16 @@ const orderSchema = new mongoose.Schema(
       ref: "Restaurant",
       required: [true, "An order must belong to a restaurant"], // Reference to Restaurant
     },
-    customer: {
-      type: mongoose.Schema.ObjectId,
-      ref: "User",
-      required: [true, "An order must have a customer"], // Reference to User
-    },
+    // customer eliminado, la orden ya no requiere usuario
     subtotal: {
       type: Number,
-      required: true,
       min: 0, // Subtotal before taxes and tips
+      default: 0,
     },
     tax: {
       type: Number,
-      required: true,
       min: 0, // Tax amount
+      default: 0,
     },
     tip: {
       type: Number,
@@ -78,21 +79,17 @@ orderSchema.index({ restaurant: 1, estado: 1 });
 orderSchema.index({ customer: 1 });
 
 // Middleware to automatically populate references on find queries
-orderSchema.pre(/^find/, function (next) {
-  this.populate({
-    path: "customer",
-    select: "name email",
-  })
-    .populate({
-      path: "restaurant",
-      select: "nombre direccion",
-    })
-    .populate({
-      path: "productos.product",
-      select: "nombre costo",
-    });
-  next();
-});
+// COMENTADO TEMPORALMENTE - puede causar problemas con save()
+// orderSchema.pre(/^find/, function (next) {
+//   this.populate({
+//     path: "restaurant",
+//     select: "nombre direccion",
+//   }).populate({
+//     path: "productos.product",
+//     select: "nombre costo",
+//   });
+//   next();
+// });
 
 // Middleware to automatically calculate total before saving
 orderSchema.pre("save", function (next) {

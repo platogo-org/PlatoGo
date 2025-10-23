@@ -45,6 +45,8 @@ export default function LoginDesign() {
             ? "/restaurant/dashboard"
             : result.user.role === "restaurant-waiter"
             ? "/waiter/dashboard"
+            : result.user.role === "restaurant-chef"
+            ? "/kitchendashboard"
             : "/";
         navigate(redirectPath);
       }

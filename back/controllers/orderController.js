@@ -1,7 +1,7 @@
 // Import Order model and generic handler factory
 const Order = require("./../models/orderModel");
 const factory = require("./handlerFactory");
-const { io } = require("../server");
+const socketIO = require("../socket");
 
 // Controller to create a new order -- All Documents will be returned no filter
 exports.createOrder = factory.createOne(Order);
@@ -9,8 +9,36 @@ exports.createOrder = factory.createOne(Order);
 // Controller to get all orders
 exports.getAllOrders = factory.getAll(Order);
 
-// Controller to get a single order by ID
-exports.getOrder = factory.getOne(Order);
+// Controller to get a single order by ID (con populate manual)
+exports.getOrder = async (req, res, next) => {
+  try {
+    const order = await Order.findById(req.params.id)
+      .populate({
+        path: "restaurant",
+        select: "nombre direccion",
+      })
+      .populate({
+        path: "productos.product",
+        select: "nombre costo",
+      });
+
+    if (!order) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Order not found",
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        data: order,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 
 // Controller to update an order by ID
 exports.updateOrder = factory.updateOne(Order);
@@ -39,10 +67,22 @@ exports.testGetAllOrders = async (req, res) => {
 
 // Add an item to an order
 exports.addItemToOrder = async (req, res, next) => {
+  console.log("asdasdasds");
   try {
-    const { orderId, productId, quantity, price } = req.body;
+    const { orderId, productId, quantity } = req.body;
 
-    // Find the order
+    // Obtener el precio del producto desde la base de datos
+    const Product = require("../models/productModel");
+    const productDoc = await Product.findById(productId);
+    if (!productDoc) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Product not found",
+      });
+    }
+    const price = productDoc.costo;
+
+    // Buscar la orden por el _id estándar de MongoDB
     const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({
@@ -50,6 +90,7 @@ exports.addItemToOrder = async (req, res, next) => {
         message: "Order not found",
       });
     }
+    console.log(order);
 
     // Check if the product already exists in the order
     const existingItem = order.productos.find(
@@ -81,7 +122,7 @@ exports.editItemInOrder = async (req, res, next) => {
   try {
     const { orderId, productId, quantity, notes } = req.body;
 
-    // Find the order
+    // Buscar la orden por el _id estándar de MongoDB
     const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({
@@ -123,8 +164,10 @@ exports.calculateOrderTotals = async (req, res, next) => {
   try {
     const { orderId, tip } = req.body;
 
-    // Find the order
+    // Buscar la orden por el _id estándar de MongoDB
+    console.log("ooo");
     const order = await Order.findById(orderId);
+    console.log("ooostia");
     if (!order) {
       return res.status(404).json({
         status: "fail",
@@ -132,25 +175,27 @@ exports.calculateOrderTotals = async (req, res, next) => {
       });
     }
 
-    // Calculate subtotal
+    // Calcular subtotal
     const subtotal = order.productos.reduce(
       (sum, item) => sum + item.quantity * item.price,
       0
     );
 
-    // Calculate tax (e.g., 10% of subtotal)
-    const tax = subtotal * 0.1;
+    // Calcular tax (16% de subtotal)
+    const tax = subtotal * 0.16;
 
-    // Update tip if provided
+    // Actualizar tip si se envía
     if (tip !== undefined) {
       order.tip = tip;
     }
 
-    // Update order fields
+    // Actualizar campos de la orden
     order.subtotal = subtotal;
     order.tax = tax;
+    // Guardar el total en la orden
+    order.total = subtotal + tax + (order.tip || 0);
 
-    // Save the updated order
+    // Guardar la orden actualizada
     await order.save();
 
     res.status(200).json({
@@ -167,15 +212,18 @@ exports.sendOrderToKitchen = async (req, res, next) => {
   try {
     const { orderId } = req.body;
 
-    // Find the order
-    const order = await Order.findById(orderId);
+    // Buscar la orden por el _id estándar de MongoDB y poblar productos
+    const order = await Order.findById(orderId).populate({
+      path: "productos.product",
+      select: "nombre costo",
+    });
     if (!order) {
       return res.status(404).json({
         status: "fail",
         message: "Order not found",
       });
     }
-
+    console.log(order);
     // Check if the order is already sent to the kitchen
     if (order.estado !== "pending") {
       return res.status(400).json({
@@ -186,10 +234,17 @@ exports.sendOrderToKitchen = async (req, res, next) => {
 
     // Update order status to 'preparing'
     order.estado = "preparing";
-    await order.save();
 
-    // Emit event to kitchen module
-    io.emit("orderToKitchen", order);
+    // Guardar primero
+    await order.save();
+    console.log("Orden guardada, emitiendo evento...");
+
+    // Emitir evento DESPUÉS de guardar exitosamente
+    const io = socketIO.getIO();
+    const orderObj = order.toObject();
+    console.log("Emitiendo 'orderToKitchen' con:", orderObj._id);
+    io.emit("orderToKitchen", orderObj);
+    console.log("✅ Evento 'orderToKitchen' emitido");
 
     res.status(200).json({
       status: "success",

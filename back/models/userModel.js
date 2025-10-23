@@ -30,7 +30,13 @@ const userShcema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["super-admin", "restaurant-admin", "restaurant-waiter", "user"], // Allowed roles
+    enum: [
+      "super-admin",
+      "restaurant-admin",
+      "restaurant-waiter",
+      "restaurant-chef",
+      "user",
+    ], // Allowed roles
     default: "restaurant-admin",
   },
   password: {
@@ -41,11 +47,12 @@ const userShcema = new mongoose.Schema({
   },
   passwordConfirm: {
     type: String,
-    required: true,
+    required: function () {
+      return this.isNew;
+    },
     validate: {
-      // This only works on CREATE AND SAVE!!!
       validator: function (el) {
-        return el === this.password; // Password confirmation must match
+        return el === this.password;
       },
       message: "Passwords are not the same",
     },
@@ -71,6 +78,14 @@ const userShcema = new mongoose.Schema({
     type: Date,
     default: null, // Null when the shift is ongoing
   },
+  shifts: [
+    {
+      date: { type: Date, required: true },
+      start: { type: Date, required: true },
+      end: { type: Date, required: true },
+      duration: { type: Number, required: true }, // duration in minutes
+    },
+  ],
 });
 
 // Hash password before saving if it was modified

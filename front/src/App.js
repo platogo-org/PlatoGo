@@ -1,3 +1,4 @@
+import KitchenDashboard from "./pages/KitchenDashboard";
 import React from "react";
 import {
   BrowserRouter as Router,
@@ -54,6 +55,16 @@ function App() {
               element={
                 <ProtectedRoute requiredRole="restaurant-waiter">
                   <WaiterDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Protected Chef Dashboard */}
+            <Route
+              path="/kitchendashboard"
+              element={
+                <ProtectedRoute requiredRole="restaurant-chef">
+                  <KitchenDashboard />
                 </ProtectedRoute>
               }
             />
