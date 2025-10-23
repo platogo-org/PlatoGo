@@ -1,18 +1,21 @@
 const Table = require("../models/tableModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
+const socketIO = require("../socket");
 
 // Asignar o transferir mesa entre meseros (solo supervisor)
 exports.assignOrTransferTable = catchAsync(async (req, res, next) => {
   const { waiterId } = req.body;
   const table = await Table.findById(req.params.id);
   if (!table) return next(new AppError("Mesa no encontrada", 404));
+
   // Solo supervisor puede asignar/transferir
   if (!req.user || req.user.role !== "restaurant-admin") {
     return next(
       new AppError("Solo el supervisor puede asignar o transferir mesas", 403)
     );
   }
+
   const fromWaiter = table.assignedWaiter;
   table.assignedWaiter = waiterId;
   table.transferHistory.push({
@@ -22,25 +25,48 @@ exports.assignOrTransferTable = catchAsync(async (req, res, next) => {
     timestamp: new Date(),
   });
   await table.save();
-  // Emitir evento WebSocket de transferencia
-  io.emit("mesaTransferida", {
+
+  const transferData = {
     mesaId: table._id,
     from: fromWaiter,
     to: waiterId,
     supervisor: req.user._id,
     timestamp: new Date(),
-  });
+  };
+
+  // Emitir evento WebSocket de transferencia usando canales específicos
+  if (table.restaurant) {
+    socketIO.emitToRestaurant(
+      table.restaurant,
+      "mesaTransferida",
+      transferData
+    );
+    // Notificar al mesero anterior si existe
+    if (fromWaiter) {
+      socketIO.emitToWaiter(fromWaiter, "mesaTransferida", transferData);
+    }
+    // Notificar al nuevo mesero
+    if (waiterId) {
+      socketIO.emitToWaiter(waiterId, "mesaTransferida", transferData);
+    }
+  } else {
+    // Fallback global
+    const io = socketIO.getIO();
+    io.emit("mesaTransferida", transferData);
+  }
+
   res.status(200).json({
     status: "success",
     data: { table },
   });
 });
+
 // Cambiar estado de la mesa solo por el mesero asignado
-const { io } = require("../server");
 exports.changeTableState = catchAsync(async (req, res, next) => {
   const { estado } = req.body;
   const table = await Table.findById(req.params.id);
   if (!table) return next(new AppError("Mesa no encontrada", 404));
+
   // Verificar que el usuario es el mesero asignado
   if (
     !req.user ||
@@ -54,13 +80,42 @@ exports.changeTableState = catchAsync(async (req, res, next) => {
       )
     );
   }
+
   if (!["libre", "ocupada", "cuenta"].includes(estado)) {
     return next(new AppError("Estado inválido", 400));
   }
+
   table.estado = estado;
   await table.save();
-  // Emitir evento WebSocket a todos los clientes
-  io.emit("mesaEstadoActualizado", { mesaId: table._id, estado });
+
+  const stateData = {
+    mesaId: table._id,
+    estado,
+    assignedWaiter: table.assignedWaiter,
+    timestamp: new Date(),
+  };
+
+  // Emitir evento WebSocket usando canales específicos
+  if (table.restaurant) {
+    socketIO.emitToRestaurant(
+      table.restaurant,
+      "mesaEstadoActualizado",
+      stateData
+    );
+    // Notificar al mesero asignado
+    if (table.assignedWaiter) {
+      socketIO.emitToWaiter(
+        table.assignedWaiter,
+        "mesaEstadoActualizado",
+        stateData
+      );
+    }
+  } else {
+    // Fallback global
+    const io = socketIO.getIO();
+    io.emit("mesaEstadoActualizado", stateData);
+  }
+
   res.status(200).json({
     status: "success",
     data: { table },
