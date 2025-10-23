@@ -1,10 +1,11 @@
-import React, { useState, useMemo, useEffect } from "react";
-import useSocket from "../hooks/useSocket";
+import React, { useState, useEffect, useCallback } from "react";
+import useRealtimeSync from "../hooks/useRealtimeSync";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
 
 const KitchenDashboard = ({ restaurantId: propRestaurantId }) => {
   const [orders, setOrders] = useState([]);
+  const [unavailableProducts, setUnavailableProducts] = useState([]);
   const { user } = useAuth();
 
   // Obtener restaurantId del usuario si no se pasa como prop
@@ -15,32 +16,57 @@ const KitchenDashboard = ({ restaurantId: propRestaurantId }) => {
     console.log("👤 Usuario:", user);
   }, [restaurantId, user]);
 
-  // Manejadores de eventos WebSocket
-  const eventHandlers = useMemo(
-    () => ({
-      testConnection: (data) => {
-        console.log("🧪 TEST: Evento de prueba recibido:", data);
-      },
-      orderToKitchen: (order) => {
-        console.log("✅ Orden recibida por websocket:", order);
-        setOrders((prev) => [order, ...prev]);
-      },
-      orderStatusUpdated: (order) => {
-        console.log("🔄 Estado de orden actualizado por WebSocket:", order);
-        setOrders((prev) => prev.map((o) => (o._id === order._id ? order : o)));
-      },
-      joinedKitchen: (data) => {
-        console.log("✅ Unido al canal de cocina:", data);
-      },
-    }),
-    []
-  );
+  // Callbacks para eventos en tiempo real
+  const handlePedidoNuevo = useCallback((order) => {
+    console.log("🆕 Nuevo pedido recibido:", order);
+    setOrders((prev) => [order, ...prev]);
+    // Notificación visual
+    if (Notification.permission === "granted") {
+      new Notification("Nuevo Pedido", {
+        body: `Pedido #${order._id.slice(-6)} recibido`,
+        icon: "/icon-order.png",
+      });
+    }
+  }, []);
 
-  // Usar el hook de socket con reconexión automática
-  const { connected, reconnecting, error } = useSocket({
+  const handlePedidoEnviadoACocina = useCallback((order) => {
+    console.log("🍳 Pedido enviado a cocina:", order);
+    // Agregar o actualizar en la lista
+    setOrders((prev) => {
+      const exists = prev.find((o) => o._id === order._id);
+      if (exists) {
+        return prev.map((o) => (o._id === order._id ? order : o));
+      }
+      return [order, ...prev];
+    });
+  }, []);
+
+  const handlePedidoActualizado = useCallback((order) => {
+    console.log("🔄 Pedido actualizado:", order);
+    setOrders((prev) => prev.map((o) => (o._id === order._id ? order : o)));
+  }, []);
+
+  const handleProductoNoDisponible = useCallback((data) => {
+    console.log("❌ Producto no disponible:", data);
+    setUnavailableProducts((prev) => [...prev, data]);
+    // Mostrar notificación
+    alert(`⚠️ ${data.message}`);
+    // Limpiar después de 5 segundos
+    setTimeout(() => {
+      setUnavailableProducts((prev) =>
+        prev.filter((p) => p.productId !== data.productId)
+      );
+    }, 5000);
+  }, []);
+
+  // Usar el hook de sincronización en tiempo real
+  const { connected, reconnecting, error } = useRealtimeSync({
     restaurantId,
     isKitchen: true,
-    eventHandlers,
+    onPedidoNuevo: handlePedidoNuevo,
+    onPedidoEnviadoACocina: handlePedidoEnviadoACocina,
+    onPedidoActualizado: handlePedidoActualizado,
+    onProductoNoDisponible: handleProductoNoDisponible,
   });
 
   // Actualizar estado de una orden
@@ -130,6 +156,28 @@ const KitchenDashboard = ({ restaurantId: propRestaurantId }) => {
     <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
       <h2>Kitchen Dashboard</h2>
       <ConnectionStatus />
+
+      {/* Alerta de productos no disponibles */}
+      {unavailableProducts.length > 0 && (
+        <div style={{ marginTop: "15px" }}>
+          {unavailableProducts.map((product, index) => (
+            <div
+              key={index}
+              style={{
+                padding: "10px",
+                background: "#fff3cd",
+                border: "1px solid #ffc107",
+                borderRadius: "4px",
+                marginBottom: "10px",
+              }}
+            >
+              ⚠️ <strong>{product.nombre || "Producto"}:</strong>{" "}
+              {product.message}
+            </div>
+          ))}
+        </div>
+      )}
+
       <div style={{ marginTop: "20px" }}>
         <h3>Órdenes recibidas</h3>
         {orders.length === 0 ? (

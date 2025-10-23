@@ -1,6 +1,10 @@
 const express = require("express");
 const tableController = require("../controllers/tableController");
+const authController = require("../controllers/authController");
 const router = express.Router();
+
+// Proteger todas las rutas (requiere autenticación)
+router.use(authController.protect);
 
 router
   .route("/")

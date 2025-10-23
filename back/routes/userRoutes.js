@@ -32,6 +32,13 @@ usersRouter.patch(
 );
 usersRouter.delete("/deleteMe", userController.deleteMe);
 
+// Restaurant admin can get waiters from their restaurant
+usersRouter.get(
+  "/restaurant-waiters",
+  authController.ensureRestaurantAdmin,
+  userController.getRestaurantWaiters
+);
+
 // Only super-admin can access the following user management routes
 // Protect create, update, and delete user operations
 usersRouter

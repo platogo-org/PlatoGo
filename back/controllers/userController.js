@@ -195,3 +195,26 @@ exports.endShift = catchAsync(async (req, res, next) => {
     data: user,
   });
 });
+
+// Get all waiters from the restaurant admin's restaurant
+exports.getRestaurantWaiters = catchAsync(async (req, res, next) => {
+  const adminRestaurant = req.user.restaurant;
+
+  if (!adminRestaurant) {
+    return next(new AppError("Admin no tiene restaurante asignado", 400));
+  }
+
+  const waiters = await User.find({
+    role: "restaurant-waiter",
+    restaurant: adminRestaurant,
+    active: true,
+  }).select("name email role restaurant");
+
+  res.status(200).json({
+    status: "success",
+    results: waiters.length,
+    data: {
+      waiters,
+    },
+  });
+});

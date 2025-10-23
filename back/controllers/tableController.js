@@ -28,31 +28,43 @@ exports.assignOrTransferTable = catchAsync(async (req, res, next) => {
 
   const transferData = {
     mesaId: table._id,
+    mesa: table.toObject(),
     from: fromWaiter,
     to: waiterId,
     supervisor: req.user._id,
     timestamp: new Date(),
+    tipo: "transferencia",
   };
 
   // Emitir evento WebSocket de transferencia usando canales específicos
   if (table.restaurant) {
+    // Evento específico de transferencia
     socketIO.emitToRestaurant(
       table.restaurant,
       "mesaTransferida",
       transferData
     );
+    // Evento unificado de actualización de mesa
+    socketIO.emitToRestaurant(
+      table.restaurant,
+      "mesa_actualizada",
+      transferData
+    );
     // Notificar al mesero anterior si existe
     if (fromWaiter) {
       socketIO.emitToWaiter(fromWaiter, "mesaTransferida", transferData);
+      socketIO.emitToWaiter(fromWaiter, "mesa_actualizada", transferData);
     }
     // Notificar al nuevo mesero
     if (waiterId) {
       socketIO.emitToWaiter(waiterId, "mesaTransferida", transferData);
+      socketIO.emitToWaiter(waiterId, "mesa_actualizada", transferData);
     }
   } else {
     // Fallback global
     const io = socketIO.getIO();
     io.emit("mesaTransferida", transferData);
+    io.emit("mesa_actualizada", transferData);
   }
 
   res.status(200).json({
@@ -90,18 +102,23 @@ exports.changeTableState = catchAsync(async (req, res, next) => {
 
   const stateData = {
     mesaId: table._id,
+    mesa: table.toObject(),
     estado,
     assignedWaiter: table.assignedWaiter,
     timestamp: new Date(),
+    tipo: "cambio_estado",
   };
 
   // Emitir evento WebSocket usando canales específicos
   if (table.restaurant) {
+    // Evento específico de cambio de estado
     socketIO.emitToRestaurant(
       table.restaurant,
       "mesaEstadoActualizado",
       stateData
     );
+    // Evento unificado de actualización de mesa
+    socketIO.emitToRestaurant(table.restaurant, "mesa_actualizada", stateData);
     // Notificar al mesero asignado
     if (table.assignedWaiter) {
       socketIO.emitToWaiter(
@@ -109,11 +126,17 @@ exports.changeTableState = catchAsync(async (req, res, next) => {
         "mesaEstadoActualizado",
         stateData
       );
+      socketIO.emitToWaiter(
+        table.assignedWaiter,
+        "mesa_actualizada",
+        stateData
+      );
     }
   } else {
     // Fallback global
     const io = socketIO.getIO();
     io.emit("mesaEstadoActualizado", stateData);
+    io.emit("mesa_actualizada", stateData);
   }
 
   res.status(200).json({

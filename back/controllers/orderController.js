@@ -1,10 +1,111 @@
 // Import Order model and generic handler factory
 const Order = require("./../models/orderModel");
+const Product = require("./../models/productModel");
 const factory = require("./handlerFactory");
 const socketIO = require("../socket");
+const catchAsync = require("../utils/catchAsync");
 
-// Controller to create a new order - All Documents will be returned no filter
-exports.createOrder = factory.createOne(Order);
+// Controller to create a new order with real-time event emission
+exports.createOrder = catchAsync(async (req, res, next) => {
+  console.log("📝 Creando nueva orden...");
+
+  // Validar disponibilidad de productos antes de crear la orden
+  if (req.body.productos && req.body.productos.length > 0) {
+    for (const item of req.body.productos) {
+      const product = await Product.findById(item.product);
+
+      if (!product) {
+        console.log(`❌ Producto no encontrado: ${item.product}`);
+
+        // Emitir evento de producto no disponible
+        const io = socketIO.getIO();
+        io.emit("producto_no_disponible", {
+          productId: item.product,
+          message: "Producto no encontrado",
+          timestamp: new Date(),
+        });
+
+        return res.status(404).json({
+          status: "fail",
+          message: `Producto ${item.product} no encontrado`,
+        });
+      }
+
+      // Verificar si el producto está disponible (si tiene ese campo)
+      if (product.disponible === false) {
+        console.log(`❌ Producto no disponible: ${product.nombre}`);
+
+        // Emitir evento de producto no disponible a todos los clientes
+        const io = socketIO.getIO();
+        const productData = {
+          productId: product._id,
+          nombre: product.nombre,
+          message: `El producto ${product.nombre} no está disponible`,
+          timestamp: new Date(),
+        };
+
+        io.emit("producto_no_disponible", productData);
+
+        // También emitir al restaurante específico si está disponible
+        if (req.body.restaurant) {
+          socketIO.emitToRestaurant(
+            req.body.restaurant,
+            "producto_no_disponible",
+            productData
+          );
+        }
+
+        return res.status(400).json({
+          status: "fail",
+          message: `El producto ${product.nombre} no está disponible`,
+          data: productData,
+        });
+      }
+    }
+  }
+
+  // Crear la orden
+  const newOrder = await Order.create(req.body);
+  console.log(`✅ Orden creada: ${newOrder._id}`);
+
+  // Poblar datos para el evento
+  const orderPopulated = await Order.findById(newOrder._id)
+    .populate({
+      path: "productos.product",
+      select: "nombre costo",
+    })
+    .populate({
+      path: "restaurant",
+      select: "nombre",
+    });
+
+  const orderObj = orderPopulated.toObject();
+  console.log(`📡 Emitiendo evento pedido_nuevo para orden ${newOrder._id}`);
+
+  // Emitir evento de nuevo pedido
+  const io = socketIO.getIO();
+
+  // Emitir globalmente
+  io.emit("pedido_nuevo", orderObj);
+
+  // Emitir al restaurante específico si existe
+  if (orderPopulated.restaurant) {
+    socketIO.emitToRestaurant(
+      orderPopulated.restaurant._id,
+      "pedido_nuevo",
+      orderObj
+    );
+  }
+
+  console.log("✅ Evento pedido_nuevo emitido");
+
+  res.status(201).json({
+    status: "success",
+    data: {
+      data: orderPopulated,
+    },
+  });
+});
 
 // Controller to get all orders
 exports.getAllOrders = factory.getAll(Order);
@@ -40,8 +141,59 @@ exports.getOrder = async (req, res, next) => {
   }
 };
 
-// Controller to update an order by ID
-exports.updateOrder = factory.updateOne(Order);
+// Controller to update an order by ID with real-time event emission
+exports.updateOrder = catchAsync(async (req, res, next) => {
+  console.log(`📝 Actualizando orden ${req.params.id}...`);
+
+  const order = await Order.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  })
+    .populate({
+      path: "productos.product",
+      select: "nombre costo",
+    })
+    .populate({
+      path: "restaurant",
+      select: "nombre",
+    });
+
+  if (!order) {
+    return res.status(404).json({
+      status: "fail",
+      message: "Order not found",
+    });
+  }
+
+  console.log(`✅ Orden actualizada: ${order._id}`);
+
+  const orderObj = order.toObject();
+  console.log(`📡 Emitiendo evento pedido_actualizado`);
+
+  // Emitir evento de pedido actualizado
+  const io = socketIO.getIO();
+
+  // Emitir globalmente
+  io.emit("pedido_actualizado", orderObj);
+
+  // Emitir al restaurante específico
+  if (order.restaurant) {
+    socketIO.emitToRestaurant(
+      order.restaurant._id,
+      "pedido_actualizado",
+      orderObj
+    );
+  }
+
+  console.log("✅ Evento pedido_actualizado emitido");
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      data: order,
+    },
+  });
+});
 
 // Controller to delete an order by ID
 exports.deleteOrder = factory.deleteOne(Order);
@@ -241,7 +393,7 @@ exports.sendOrderToKitchen = async (req, res, next) => {
 
     // Emitir evento DESPUÉS de guardar exitosamente usando canales específicos
     const orderObj = order.toObject();
-    console.log("Emitiendo 'orderToKitchen' con:", orderObj._id);
+    console.log("Emitiendo eventos de orden enviada a cocina:", orderObj._id);
     console.log("Restaurant de la orden:", order.restaurant);
 
     // Obtener instancia de io
@@ -250,20 +402,33 @@ exports.sendOrderToKitchen = async (req, res, next) => {
     // Emitir a la cocina del restaurante específico
     if (order.restaurant) {
       console.log(`📡 Emitiendo a canal kitchen_${order.restaurant}`);
+      // Evento legacy (mantener compatibilidad)
       socketIO.emitToKitchen(order.restaurant, "orderToKitchen", orderObj);
+      // Evento estandarizado requerido
+      socketIO.emitToKitchen(
+        order.restaurant,
+        "pedido_enviado_a_cocina",
+        orderObj
+      );
       // También notificar al restaurante general
       socketIO.emitToRestaurant(
         order.restaurant,
         "orderStatusChanged",
         orderObj
       );
+      socketIO.emitToRestaurant(
+        order.restaurant,
+        "pedido_actualizado",
+        orderObj
+      );
     }
 
     // SIEMPRE emitir globalmente como fallback
-    console.log("📡 Emitiendo globalmente 'orderToKitchen'");
-    io.emit("orderToKitchen", orderObj);
+    console.log("📡 Emitiendo eventos globalmente");
+    io.emit("orderToKitchen", orderObj); // Legacy
+    io.emit("pedido_enviado_a_cocina", orderObj); // Estandarizado
 
-    console.log("✅ Evento 'orderToKitchen' emitido");
+    console.log("✅ Eventos emitidos correctamente");
 
     res.status(200).json({
       status: "success",
