@@ -6,20 +6,14 @@ module.exports = {
     const { Server } = require("socket.io");
     io = new Server(server, {
       cors: {
-        origin: [
-          "http://localhost:4000",
-          "http://localhost",
-          "http://localhost:3000",
-          "http://localhost:3001",
-          "http://127.0.0.1:3001",
-        ],
-        credentials: true,
+        origin: "*",
+        methods: ["GET", "POST"],
       },
       // Configuración para reconexión automática y keepAlive
       pingTimeout: 60000, // Tiempo máximo sin recibir pong antes de cerrar conexión
       pingInterval: 25000, // Intervalo de envío de ping
       connectTimeout: 45000, // Timeout de conexión inicial
-      transports: ["websocket", "polling"], // Priorizar websocket, fallback a polling
+      transports: ["polling", "websocket"], // Priorizar polling, fallback a websocket
     });
 
     io.on("connection", (socket) => {
