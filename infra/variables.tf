@@ -8,3 +8,19 @@ variable "environment" {
   description = "Deployment environment (dev, qa, prod)"
   type        = string
 }
+
+variable "image_tag" {
+  description = "Docker image tag to deploy"
+  type        = string
+  default     = "latest"
+}
+
+variable "api_secrets" {
+  description = "Secrets for API container (from AWS Secrets Manager)"
+  type = list(object({
+    name      = string
+    valueFrom = string
+  }))
+  default = []
+  
+}

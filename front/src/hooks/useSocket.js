@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { io } from "socket.io-client";
 
-const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || "http://localhost:4000";
+// Usar window.SOCKET_URL (inyectado en runtime) o fallback a localhost
+const SOCKET_URL = window.SOCKET_URL || "http://localhost:4000";
 
 /**
  * Hook personalizado para manejar conexiones WebSocket con reconexión automática
@@ -36,13 +37,16 @@ export const useSocket = ({
     });
 
     const socketInstance = io(SOCKET_URL, {
-      transports: ["websocket", "polling"],
+      // Usar polling primero, luego intentar upgrade a websocket
+      transports: ["polling", "websocket"],
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
       reconnectionAttempts: maxReconnectAttempts,
       timeout: 20000,
       autoConnect: true,
+      // Permitir upgrade a WebSocket si está disponible
+      upgrade: true,
     });
 
     socketRef.current = socketInstance;

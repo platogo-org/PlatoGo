@@ -76,8 +76,7 @@ if (process.env.NODE_ENV === "development") {
 // Enable CORS for frontend (DEBE IR ANTES del rate limiter y body parser)
 app.use(
   cors({
-    origin: "http://localhost:3000",
-    credentials: true,
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
     exposedHeaders: ["Content-Type", "Authorization", "Cookie"],
@@ -88,12 +87,13 @@ app.use(
 app.options("*", cors());
 
 // Limit requests from same API (rate limiting)
-const limiter = rateLimit({
-  max: 100,
-  windowMs: 60 * 60 * 1000,
-  message: "Too many requests from this IP, please try again in an hour!",
-});
-app.use("/api", limiter);
+// COMENTADO TEMPORALMENTE PARA TESTING
+// const limiter = rateLimit({
+//   max: 100,
+//   windowMs: 60 * 60 * 1000,
+//   message: "Too many requests from this IP, please try again in an hour!",
+// });
+// app.use("/api", limiter);
 
 // Body parser, reading data from body into req.body
 app.use(express.json({ limit: "10kb" }));
@@ -128,6 +128,14 @@ app.use(compression());
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next();
+});
+
+// Health check endpoint for ALB
+app.get("/api/v1/health", (req, res) => {
+  res.status(200).json({
+    status: "success",
+    message: "API is healthy",
+  });
 });
 
 // API routes
