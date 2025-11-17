@@ -33,5 +33,11 @@ orderRouter.patch("/:orderId/status", orderController.updateOrderStatus);
 
 orderRouter.get("/test", orderController.testGetAllOrders);
 
+// Ruta para obtener órdenes activas por mesa
+orderRouter.get("/active-by-table/:tableId", orderController.getActiveOrdersByTable);
+
+// Ruta para obtener estadísticas de un mesero
+orderRouter.get("/stats/:waiterId", orderController.getWaiterStats);
+
 // Export order router
 module.exports = orderRouter;

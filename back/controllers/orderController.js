@@ -110,6 +110,33 @@ exports.createOrder = catchAsync(async (req, res, next) => {
 // Controller to get all orders
 exports.getAllOrders = factory.getAll(Order);
 
+// Función para obtener órdenes activas (no canceladas ni entregadas) por mesa
+exports.getActiveOrdersByTable = catchAsync(async (req, res, next) => {
+  const { tableId } = req.params;
+
+  if (!tableId) {
+    return next(new AppError("Debe proporcionar un ID de mesa", 400));
+  }
+
+  const activeOrders = await Order.find({
+    table: tableId,
+    estado: { $nin: ["delivered", "cancelled"] }, // Órdenes activas
+  })
+    .populate({
+      path: "productos.product",
+      select: "nombre costo",
+    })
+    .sort("-createdAt"); // Más recientes primero
+
+  res.status(200).json({
+    status: "success",
+    result: activeOrders.length,
+    data: {
+      orders: activeOrders,
+    },
+  });
+});
+
 // Controller to get a single order by ID (con populate manual)
 exports.getOrder = async (req, res, next) => {
   try {
@@ -538,3 +565,33 @@ exports.updateOrderStatus = async (req, res, next) => {
     next(err);
   }
 };
+
+
+// Controller to get waiter performance statistics
+exports.getWaiterStats = catchAsync(async (req, res, next) => {
+  const { waiterId } = req.params;
+
+  if (!waiterId) {
+    return next(new AppError("Debe proporcionar un ID de mesero", 400));
+  }
+
+  // Obtener todas las órdenes entregadas por el mesero
+  const deliveredOrders = await Order.find({
+    assignedWaiter: waiterId, // Asumiendo que se añade este campo a la orden
+    estado: "delivered",
+  });
+
+  // Calcular el número total de pedidos atendidos
+  const ordersServed = deliveredOrders.length;
+
+  // Calcular el total de ventas
+  const totalSales = deliveredOrders.reduce((acc, order) => acc + order.total, 0);
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      ordersServed,
+      totalSales,
+    },
+  });
+});

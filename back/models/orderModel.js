@@ -61,6 +61,15 @@ const orderSchema = new mongoose.Schema(
       default: 0, // Tip amount, editable before order closure
       min: 0,
     },
+    table: {
+      type: mongoose.Schema.ObjectId,
+      ref: "Table",
+      required: [true, "An order must be associated with a table"], // Reference to Table
+    },
+    assignedWaiter: {
+      type: mongoose.Schema.ObjectId,
+      ref: "User", // Asumiendo que el mesero es un User
+    },
   },
   {
     timestamps: true, // Add createdAt and updatedAt fields
@@ -76,6 +85,7 @@ orderSchema.virtual("total").get(function () {
 
 // Indexes for efficient queries
 orderSchema.index({ restaurant: 1, estado: 1 });
+orderSchema.index({ table: 1, estado: 1 });
 orderSchema.index({ customer: 1 });
 
 // Middleware to automatically populate references on find queries
