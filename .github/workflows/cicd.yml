@@ -1,0 +1,82 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, staging, prod]
+  pull_request:
+    branches: [main, staging, prod]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install dependencies (API)
+        run: |
+          cd back
+          npm install
+      - name: Run tests (API)
+        run: |
+          cd back
+          npm test || exit 1
+      - name: Install dependencies (WebApp)
+        run: |
+          cd front
+          npm install
+      - name: Run tests (WebApp)
+        run: |
+          cd front
+          npm test || exit 1
+
+  build-push-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: us-east-1
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build API Docker image
+        run: |
+          docker build -t api-img ./back
+      - name: Build WebApp Docker image
+        run: |
+          docker build -t webapp-img ./front
+
+      - name: Tag Docker images
+        run: |
+          TAG=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
+          docker tag api-img:latest ${{ steps.login-ecr.outputs.registry }}/$TAG-api:latest
+          docker tag webapp-img:latest ${{ steps.login-ecr.outputs.registry }}/$TAG-webapp:latest
+
+      - name: Push Docker images to ECR
+        run: |
+          TAG=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
+          docker push ${{ steps.login-ecr.outputs.registry }}/$TAG-api:latest
+          docker push ${{ steps.login-ecr.outputs.registry }}/$TAG-webapp:latest
+
+      - name: Validar infraestructura con Terraform
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/prod'
+        run: |
+          cd infra
+          terraform init
+          terraform plan -var-file="environments/dev.tfvars"
+      - name: Deploy to ECS (only on main, staging, prod)
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/prod'
+        run: |
+          cd infra
+          terraform apply -var-file="environments/dev.tfvars" -auto-approve

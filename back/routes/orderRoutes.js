@@ -12,7 +12,7 @@ orderRouter.use(authController.protect);
 orderRouter
   .route("/")
   .get(orderController.getAllOrders)
-  .post(ensureRestaurantOwnership, orderController.createOrder);
+  .post(orderController.createOrder);
 
 // Route for getting, updating, and deleting an order by ID
 orderRouter
@@ -20,6 +20,18 @@ orderRouter
   .get(orderController.getOrder)
   .patch(ensureRestaurantOwnership, orderController.updateOrder)
   .delete(ensureRestaurantOwnership, orderController.deleteOrder);
+
+// Ruta de prueba para obtener todos los pedidos sin middleware adicional
+
+// Endpoint para agregar un producto a una orden
+orderRouter.post("/add-item", orderController.addItemToOrder);
+orderRouter.post("/calculate-totals", orderController.calculateOrderTotals);
+orderRouter.post("/send-to-kitchen", orderController.sendOrderToKitchen);
+
+// Endpoint para actualizar el estado de una orden (usado por cocina)
+orderRouter.patch("/:orderId/status", orderController.updateOrderStatus);
+
+orderRouter.get("/test", orderController.testGetAllOrders);
 
 // Export order router
 module.exports = orderRouter;

@@ -65,6 +65,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     passwordChangedAt: req.body.passwordChangedAt,
     role: req.body.role,
   });
+
   const url = `${req.protocol}://${req.get("host")}/me`;
   await new Email(newUser, url).sendWelcome();
   createSendToken(newUser, 201, req, res);
@@ -86,6 +87,16 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError("Incorrect Email or Password", 401));
   }
   // 3) If everything ok, send token to client
+  let redirectUrl = "/";
+  if (user.role === "restaurant-waiter") {
+    redirectUrl = "/waiter/dashboard";
+  } else if (user.role === "restaurant-admin") {
+    redirectUrl = "/admin/dashboard";
+  } else if (user.role === "super-admin") {
+    redirectUrl = "/super-admin/dashboard";
+  }
+
+  // Use createSendToken to send response, including role and redirectUrl
   createSendToken(user, 200, req, res);
 });
 
@@ -110,6 +121,8 @@ exports.protect = catchAsync(async (req, res, next) => {
   } else if (req.cookies.jwt) {
     token = req.cookies.jwt;
   }
+  console.log("[PROTECT] Token recibido:", token);
+  console.log("[PROTECT] Headers:", req.headers);
 
   if (!token) {
     return next(
@@ -192,6 +205,23 @@ exports.ensureSuperAdmin = (req, res, next) => {
 
   if (req.user.role !== "super-admin") {
     return next(new AppError("Only Super Admins can perform this action", 403));
+  }
+
+  next();
+};
+
+// Ensure the authenticated user is a Restaurant Admin
+exports.ensureRestaurantAdmin = (req, res, next) => {
+  if (!req.user) {
+    return next(
+      new AppError("You are not logged in! Please log in to get access", 401)
+    );
+  }
+
+  if (req.user.role !== "restaurant-admin") {
+    return next(
+      new AppError("Only Restaurant Admins can perform this action", 403)
+    );
   }
 
   next();

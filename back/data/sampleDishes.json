@@ -1,0 +1,122 @@
+[
+  {
+    "nombre": "Tacos al Pastor",
+    "descripcion": "Tortillas de maíz rellenas de cerdo adobado, piña y cebolla.",
+    "costo": 45,
+    "restaurant": null
+  },
+  {
+    "nombre": "Enchiladas Verdes",
+    "descripcion": "Tortillas rellenas de pollo bañadas en salsa verde.",
+    "costo": 60,
+    "restaurant": null
+  },
+  {
+    "nombre": "Pozole Rojo",
+    "descripcion": "Sopa tradicional de maíz con carne de cerdo y chile rojo.",
+    "costo": 80,
+    "restaurant": null
+  },
+  {
+    "nombre": "Chiles en Nogada",
+    "descripcion": "Chile poblano relleno de picadillo, cubierto con salsa de nuez.",
+    "costo": 120,
+    "restaurant": null
+  },
+  {
+    "nombre": "Mole Poblano",
+    "descripcion": "Pollo bañado en salsa de mole con ajonjolí.",
+    "costo": 110,
+    "restaurant": null
+  },
+  {
+    "nombre": "Quesadillas de Flor de Calabaza",
+    "descripcion": "Tortilla rellena de flor de calabaza y queso.",
+    "costo": 35,
+    "restaurant": null
+  },
+  {
+    "nombre": "Tamales Oaxaqueños",
+    "descripcion": "Tamales envueltos en hoja de plátano, rellenos de mole.",
+    "costo": 30,
+    "restaurant": null
+  },
+  {
+    "nombre": "Ceviche de Camarón",
+    "descripcion": "Camarón marinado en limón con jitomate, cebolla y cilantro.",
+    "costo": 90,
+    "restaurant": null
+  },
+  {
+    "nombre": "Tostadas de Tinga",
+    "descripcion": "Tostadas crujientes con pollo deshebrado en salsa de chipotle.",
+    "costo": 50,
+    "restaurant": null
+  },
+  {
+    "nombre": "Sopes de Chorizo",
+    "descripcion": "Sopes gruesos de maíz con frijoles, chorizo y crema.",
+    "costo": 40,
+    "restaurant": null
+  },
+  {
+    "nombre": "Cochinita Pibil",
+    "descripcion": "Carne de cerdo marinada en achiote y cocida en hoja de plátano.",
+    "costo": 95,
+    "restaurant": null
+  },
+  {
+    "nombre": "Flautas de Pollo",
+    "descripcion": "Tortillas enrolladas y fritas rellenas de pollo.",
+    "costo": 38,
+    "restaurant": null
+  },
+  {
+    "nombre": "Gorditas de Chicharrón",
+    "descripcion": "Gorditas rellenas de chicharrón prensado.",
+    "costo": 32,
+    "restaurant": null
+  },
+  {
+    "nombre": "Tamal Dulce",
+    "descripcion": "Tamal de masa dulce con pasas y colorante rosa.",
+    "costo": 25,
+    "restaurant": null
+  },
+  {
+    "nombre": "Pambazo de Papa con Chorizo",
+    "descripcion": "Pan remojado en salsa y relleno de papa con chorizo.",
+    "costo": 42,
+    "restaurant": null
+  },
+  {
+    "nombre": "Empanadas de Queso",
+    "descripcion": "Empanadas fritas rellenas de queso y salsa.",
+    "costo": 28,
+    "restaurant": null
+  },
+  {
+    "nombre": "Tacos de Barbacoa",
+    "descripcion": "Tortillas rellenas de barbacoa de res y consomé.",
+    "costo": 70,
+    "restaurant": null
+  },
+  {
+    "nombre": "Ensalada de Nopales",
+    "descripcion": "Nopales frescos con jitomate, cebolla y queso fresco.",
+    "costo": 33,
+    "restaurant": null
+  },
+  {
+    "nombre": "Caldo de Pollo",
+    "descripcion": "Sopa de pollo con verduras y arroz.",
+    "costo": 55,
+    "restaurant": null
+  },
+  {
+    "nombre": "Tacos Dorados de Papa",
+    "descripcion": "Tortillas fritas rellenas de papa y salsa verde.",
+    "costo": 36,
+    "restaurant": null
+  }
+]

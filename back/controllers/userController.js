@@ -124,3 +124,97 @@ exports.deleteUser = factory.deleteOne(User);
 //     messaje: 'This route is not yet defined',
 //   });
 // };
+
+// Start a shift
+exports.startShift = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+
+  if (!user) {
+    return next(new AppError("User not found", 404));
+  }
+
+  if (user.role !== "restaurant-waiter") {
+    return next(new AppError("Only waiters can start a shift", 403));
+  }
+
+  if (user.shiftStart) {
+    return next(new AppError("Shift already started", 400));
+  }
+
+  user.shiftStart = new Date();
+  user.shiftEnd = null; // Ensure shiftEnd is reset
+  user.passwordConfirm = undefined;
+  await user.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Shift started",
+    data: user,
+  });
+});
+
+// End a shift
+exports.endShift = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+
+  if (!user) {
+    return next(new AppError("User not found", 404));
+  }
+
+  if (user.role !== "restaurant-waiter") {
+    return next(new AppError("Only waiters can end a shift", 403));
+  }
+
+  if (!user.shiftStart) {
+    return next(new AppError("No active shift to end", 400));
+  }
+
+  const shiftEnd = new Date();
+  user.shiftEnd = shiftEnd;
+
+  // Calculate duration in minutes
+  const duration = Math.round((shiftEnd - user.shiftStart) / 60000);
+
+  // Add shift info to shifts array
+  user.shifts.push({
+    date: user.shiftStart,
+    start: user.shiftStart,
+    end: shiftEnd,
+    duration,
+  });
+
+  // Reset shiftStart and shiftEnd
+  user.shiftStart = null;
+  user.shiftEnd = null;
+  user.passwordConfirm = undefined;
+  await user.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Shift ended",
+    data: user,
+  });
+});
+
+// Get all waiters from the restaurant admin's restaurant
+exports.getRestaurantWaiters = catchAsync(async (req, res, next) => {
+  const adminRestaurant = req.user.restaurant;
+
+  if (!adminRestaurant) {
+    return next(new AppError("Admin no tiene restaurante asignado", 400));
+  }
+
+  const waiters = await User.find({
+    role: "restaurant-waiter",
+    restaurant: adminRestaurant,
+    active: true,
+  }).select("name email role restaurant");
+
+  res.status(200).json({
+    status: "success",
+    results: waiters.length,
+    data: {
+      waiters,
+    },
+  });
+});

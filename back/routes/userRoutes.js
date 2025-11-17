@@ -17,6 +17,11 @@ usersRouter.patch("/resetPassword/:token", authController.resetPassword);
 usersRouter.use(authController.protect);
 
 // Authenticated user routes
+
+// Shift management routes (waiter actions)
+usersRouter.post("/start-shift", userController.startShift);
+usersRouter.post("/end-shift", userController.endShift);
+
 usersRouter.patch("/updateMyPassword", authController.updatePassword);
 usersRouter.get("/me", userController.getMe, userController.getUser);
 usersRouter.patch(
@@ -26,6 +31,13 @@ usersRouter.patch(
   userController.updateMe
 );
 usersRouter.delete("/deleteMe", userController.deleteMe);
+
+// Restaurant admin can get waiters from their restaurant
+usersRouter.get(
+  "/restaurant-waiters",
+  authController.ensureRestaurantAdmin,
+  userController.getRestaurantWaiters
+);
 
 // Only super-admin can access the following user management routes
 // Protect create, update, and delete user operations

@@ -19,7 +19,9 @@ const categoryRouter = require("./routes/categoryRoutes");
 const orderRouter = require("./routes/orderRoutes");
 const productRouter = require("./routes/productRoutes");
 const restaurantRouter = require("./routes/restaurantRoutes");
+const tableRouter = require("./routes/tableRoutes");
 const viewRouter = require("./routes/viewRoutes");
+const modifierRouter = require("./routes/modifierRoutes");
 
 // Initialize express app
 const app = express();
@@ -71,23 +73,27 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-// Limit requests from same API (rate limiting)
-const limiter = rateLimit({
-  max: 100,
-  windowMs: 60 * 60 * 1000,
-  message: "Too many requests from this IP, please try again in an hour!",
-});
-app.use("/api", limiter);
-
-// Enable CORS for frontend
+// Enable CORS for frontend (DEBE IR ANTES del rate limiter y body parser)
 app.use(
   cors({
-    origin: ["http://localhost:3001", "http://127.0.0.1:3001"],
-    credentials: true,
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+    exposedHeaders: ["Content-Type", "Authorization", "Cookie"],
   })
 );
+
+// Responder a preflight OPTIONS para todas las rutas
+app.options("*", cors());
+
+// Limit requests from same API (rate limiting)
+// COMENTADO TEMPORALMENTE PARA TESTING
+// const limiter = rateLimit({
+//   max: 100,
+//   windowMs: 60 * 60 * 1000,
+//   message: "Too many requests from this IP, please try again in an hour!",
+// });
+// app.use("/api", limiter);
 
 // Body parser, reading data from body into req.body
 app.use(express.json({ limit: "10kb" }));
@@ -124,12 +130,22 @@ app.use((req, res, next) => {
   next();
 });
 
+// Health check endpoint for ALB
+app.get("/api/v1/health", (req, res) => {
+  res.status(200).json({
+    status: "success",
+    message: "API is healthy",
+  });
+});
+
 // API routes
 app.use("/api/v1/users", usersRouter);
 app.use("/api/v1/category", categoryRouter);
 app.use("/api/v1/order", orderRouter);
 app.use("/api/v1/product", productRouter);
 app.use("/api/v1/restaurant", restaurantRouter);
+app.use("/api/v1/table", tableRouter);
+app.use("/api/v1/modifiers", modifierRouter);
 
 // View engine and static files
 app.set("view engine", "pug");

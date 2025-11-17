@@ -1,0 +1,31 @@
+# Dependencies
+node_modules
+npm-debug.log*
+
+# Testing
+coverage
+src/**/*.test.js
+src/**/*.spec.js
+
+# Production
+build
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+README.md
+
+# Misc
+.DS_Store

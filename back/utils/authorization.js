@@ -1,6 +1,6 @@
 // Import AppError for custom error handling
 const AppError = require("../utils/appError");
-const Restaurant = require("../models/RestaurantModel");
+const Restaurant = require("../models/restaurantModel");
 
 /**
  * Middleware to ensure the authenticated user is the owner of the restaurant (for restaurant-admin)

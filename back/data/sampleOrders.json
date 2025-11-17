@@ -1,0 +1,21 @@
+[
+  {
+    "productos": [
+      { "product": null, "quantity": 2, "price": 45 },
+      { "product": null, "quantity": 1, "price": 60 }
+    ],
+    "estado": "pending",
+    "restaurant": null,
+    "customer": null,
+    "total": 150,
+    "notas": "Sin picante"
+  },
+  {
+    "productos": [{ "product": null, "quantity": 1, "price": 120 }],
+    "estado": "confirmed",
+    "restaurant": null,
+    "customer": null,
+    "total": 120,
+    "notas": "Agregar más salsa"
+  }
+]

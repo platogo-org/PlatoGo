@@ -1,3 +1,11 @@
+## Terraform
+infra/.terraform/
+infra/.terraform.lock.hcl
+infra/terraform.tfstate
+infra/terraform.tfstate.backup
+infra/terraform.tfvars
+infra/environments/*.tfstate
+infra/environments/*.tfstate.backup
 # Global ignores for PlatoGo monorepo
 
 # Node dependencies
@@ -73,4 +81,6 @@ front/coverage/
 # Storybook (if later added)
 storybook-static/
 front/node_modules/
+front/node_modules/*
 front/.cache/
+

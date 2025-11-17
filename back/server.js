@@ -25,10 +25,15 @@ mongoose.connect(DB).then(() => {
 });
 
 // Start server on specified port. If process not found default is 3000
-const port = process.env.port || 3000;
+const port = process.env.PORT || 3000;
+
 const server = app.listen(port, () => {
   console.log(`App running on port ${port}...`);
 });
+
+// Integrar socket.io
+const socketIO = require("./socket");
+socketIO.init(server);
 
 // Handle unhandled promise rejections
 process.on("unhandledRejection", (err) => {
