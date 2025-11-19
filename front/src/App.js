@@ -1,3 +1,16 @@
+<<<<<<< HEAD
+
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import LoginDesign from './LoginDesign';
+import ClientDesign from './ClientDesign';
+import ChefDesign from './ChefDesign';
+import SuperAdminDashboard from './components/SuperAdminDashboard';
+import RestaurantAdminDashboard from './components/RestaurantAdminDashboard';
+import ProtectedRoute from './components/ProtectedRoute';
+import './App.css';
+=======
 import KitchenDashboard from "./pages/KitchenDashboard";
 import React from "react";
 import {
@@ -19,6 +32,7 @@ import ShiftManagement from "./pages/ShiftManagement";
 import OrderManagement from "./pages/OrderManagement";
 import OrderTotals from "./pages/OrderTotals";
 import SendToKitchen from "./pages/SendToKitchen";
+>>>>>>> master
 
 function App() {
   return (
@@ -49,6 +63,12 @@ function App() {
               }
             />
 
+<<<<<<< HEAD
+            {/* Client Design route */}
+            <Route path="/client" element={<ClientDesign />} />
+
+            { /* ChefDesign route */ }
+=======
             {/* Protected Waiter Dashboard */}
             <Route
               path="/waiter/dashboard"
@@ -141,6 +161,7 @@ function App() {
             <Route path="/client" element={<ClientDesign />} />
 
             {/* ChefDesign route */}
+>>>>>>> master
             <Route path="/chef" element={<ChefDesign />} />
 
             {/* Default redirect to login */}

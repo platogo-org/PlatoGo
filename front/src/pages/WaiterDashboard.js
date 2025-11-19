@@ -1,6 +1,6 @@
 import React from "react";
 import { useAuth } from "../contexts/AuthContext";
-import WaiterDashboardComponent from "../components/WaiterDashboard";
+import TableBoard from "../components/TableBoard";
 
 const WaiterDashboard = () => {
   const { user } = useAuth();
@@ -12,12 +12,9 @@ const WaiterDashboard = () => {
   const waiterId = user._id || user.id;
 
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
-      <h2>Bienvenido, {user.name}</h2>
-      <p>Rol: {user.role}</p>
-
-      {/* Renderizar el dashboard completo con mesas y órdenes */}
-      <WaiterDashboardComponent
+    <div>
+      {/* Renderizar el nuevo tablero de mesas con órdenes activas */}
+      <TableBoard
         restaurantId={restaurantId}
         waiterId={waiterId}
       />
